@@ -90,7 +90,7 @@
                         class="material-icons">add_circle_outline</i></button>
                 <button onclick="menuManager('remove')" type="button" class="btn btn-primary"><i
                         class="material-icons">remove_circle_outline</i></button>
-                <button type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
+                <button onclick="menuManager('move')" type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
                 <button onclick="menuManager('edit')" type="button" class="btn btn-primary"><i
                         class="material-icons">edit</i></button>
             </div>
@@ -121,7 +121,6 @@
                         $('#newItemModal').modal('show')
                     }
                     else if (task == "move") {
-
                     }
                     else if (task == "edit") {
                         $('#editItemModal').modal('show')
@@ -137,7 +136,7 @@
 
                     }
                     else if (task == "move") {
-
+                        $('#moveContainerModal').modal('show')
                     }
                     else if (task == "edit") {
                         $('#editContainerModal').modal('show')
@@ -325,12 +324,71 @@
             var marker;
             var marker2;
             var rectangle;
+            var rectangles = [];
+            var names = []
+
+            function populate_rectangles()
+            {
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (containerData)
+                    {
+                        rectangles = [];
+                        names = [];
+                        for (let i = 1; i < containerData[0].length; i++) {
+                            var bounds = [[containerData[1][i], containerData[2][i]], [containerData[3][i], containerData[4][i]]];
+                            var newrectangle = L.rectangle(bounds, {color: containerData[5][i], weight: 1});
+                            rectangles.push(newrectangle);
+                            names.push(containerData[0][i]);
+                        }
+                    }
+                });
+            }
+
+            function moveMarker()
+            {
+                var rectangle2;
+                var name = userInfo()
+                for(let i = 0; i<names.length; i++)
+                {
+                    if(names[i] == name)
+                    {
+                        rectangle2 = rectangles[i];
+                    }
+                    else return
+                }
+
+                var data = rectangle2.getLatLngs();
+                var width = (data[0][0]).lat - (data[0][2]).lat  
+                var height = (data[0][0]).lng - (data[0][2]).lng  
+
+                rectangle2.on({
+                    mousedown: function () {
+                        map.dragging.disable();
+                        map.on('mousemove', function (e) {
+                            bounds[0][0] = e.latlng.lat-(width/2);
+                            bounds[0][1] = e.latlng.lng-(height/2);
+                            bounds[1][0] = e.latlng.lat+(width/2);
+                            bounds[1][1] = e.latlng.lng+(height/2);
+                            rectangle2.setBounds(bounds);
+                        });
+                    }
+                }); 
+                map.on('mouseup',function(e){
+                    map.dragging.enable();
+                    map.removeEventListener('mousemove');
+                    rectangle2.off()
+                })
+                    
+            }
 
             $(document).ready(function () {
                 //This makes sure the buttons only are depressed when you are activly clicking them :(
                 $(".btn").mouseup(function () {
                     $(this).blur();
                 })
+
+                populate_rectangles()
 
                 //Display location of item
                 $("#getData").on("click", function () {
@@ -430,7 +488,9 @@
                 $.getJSON({
                     url: '/set_values_container',
                     data: { name: nameOfItem, colour: colourOfContainer, lat1: latOfItem1, lng1: lngOfItem1, lat2: latOfItem2, lng2: lngOfItem2 },
-                    success: function (data) { }
+                    success: function (data) { 
+                        populate_rectangles()
+                    }
                 });
                 customAlert("add-alert");
 
