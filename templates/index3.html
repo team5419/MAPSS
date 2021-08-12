@@ -453,6 +453,8 @@
                 var name = containerToMove()
                 var rowToReplace = 1000;
 
+                window.alert(names)
+
                 for(let i = 0; i<names.length; i++)
                 {
                     if(names[i] == name)
@@ -479,7 +481,7 @@
             function load() {
                 //Clear Alerts
                 customAlert();
-
+                populate_rectangles()
                 //This makes sure the buttons only are depressed when you are activly clicking them :(
                 $(".btn").mouseup(function () {
                     $(this).blur();
