@@ -90,7 +90,8 @@
                         class="material-icons">add_circle_outline</i></button>
                 <button onclick="menuManager('remove')" type="button" class="btn btn-primary"><i
                         class="material-icons">remove_circle_outline</i></button>
-                <button onclick="menuManager('move')" type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
+                <button onclick="menuManager('move')" type="button" class="btn btn-primary"><i
+                        class="material-icons">open_with</i></button>
                 <button onclick="menuManager('edit')" type="button" class="btn btn-primary"><i
                         class="material-icons">edit</i></button>
             </div>
@@ -336,7 +337,6 @@
                         <div class="form-group">
                             <label for="item-name" class="col-form-label">Container Name</label>
                             <input class="form-control" id="move-container-name" type="text" minlength="1">
-
                         </div>
                     </form>
                 </div>
@@ -344,6 +344,39 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" onclick="moveContainer()"
                         data-dismiss="modal">Move</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Overlapping Container Modal -->
+    <div class="modal fade" id="overlapContainerModal" tabindex="-1" role="dialog"
+        aria-labelledby="overlapContainerModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="overlapContainerModalLabel">You have placed an item in an area with
+                        multiple containers</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Choose a container for your item: </label>
+                            <select name="containers" id="overlapContainerName">
+                                <option value="1">Emma</option>
+                                <option value="2">Emma2.0</option>
+                                <option value="3">Emma3.0</option>
+                                <option value="4">Emma4.0</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="OverlapContainer" data-dismiss="modal">Add
+                        Item</button>
                 </div>
             </div>
         </div>
@@ -357,17 +390,15 @@
             var rectangles = [];
             var names = []
 
-            function populate_rectangles()
-            {
+            function populate_rectangles() {
                 $.getJSON({
                     url: '/get_all_containers',
-                    success: function (containerData)
-                    {
+                    success: function (containerData) {
                         rectangles = [];
                         names = [];
                         for (let i = 1; i < containerData[0].length; i++) {
                             var bounds = [[containerData[1][i], containerData[2][i]], [containerData[3][i], containerData[4][i]]];
-                            newrectangle = L.rectangle(bounds, {color: containerData[5][i], weight: 1});
+                            newrectangle = L.rectangle(bounds, { color: containerData[5][i], weight: 1 });
                             rectangles.push(newrectangle);
                             names.push(containerData[0][i]);
                         }
@@ -427,13 +458,11 @@
                 })      
             }*/
 
-            function moveContainer()
-            {
+            function moveContainer() {
                 addContainerData2()
             }
 
-            function publishMarker2()
-            {
+            function publishMarker2() {
                 // Get name of item to add
                 var latFinal1 = Math.round(marker3.getLatLng().lat);
                 var lngFinal1 = Math.round(marker3.getLatLng().lng);
@@ -453,10 +482,8 @@
                 var name = containerToMove()
                 var rowToReplace = 1000;
 
-                for(let i = 0; i<names.length; i++)
-                {
-                    if(names[i] == name)
-                    {
+                for (let i = 0; i < names.length; i++) {
+                    if (names[i] == name) {
                         rectangle2 = rectangles[i];
                         rowToReplace = i;
                     }
@@ -470,7 +497,7 @@
 
                 $.getJSON({
                     url: '/move_container',
-                    data: {row: rowToReplace, x1:latOfItem1, x2:latOfItem2, y1:lngOfItem1, y2:lngOfItem2},
+                    data: { row: rowToReplace, x1: latOfItem1, x2: latOfItem2, y1: lngOfItem1, y2: lngOfItem2 },
                     success: function (data) {
                     }
                 });
@@ -593,7 +620,7 @@
                 $.getJSON({
                     url: '/set_values',
                     data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
-                    success: function (data) { 
+                    success: function (data) {
                         //DATA IS AN ARRAY WITH THE NAMES OF THE OVERLAPPING CONTAINERS
                         $.getJSON({
                             url: '/pick_container',
@@ -635,7 +662,7 @@
                 $.getJSON({
                     url: '/set_values_container',
                     data: { name: nameOfItem, colour: colourOfContainer, lat1: latOfItem1, lng1: lngOfItem1, lat2: latOfItem2, lng2: lngOfItem2 },
-                    success: function (data) { 
+                    success: function (data) {
                         populate_rectangles();
                     }
                 });
