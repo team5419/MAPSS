@@ -342,7 +342,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="moveContainer"
+                    <button type="button" class="btn btn-primary" onclick="moveContainer()"
                         data-dismiss="modal">Move</button>
                 </div>
             </div>
@@ -353,6 +353,128 @@
             var marker;
             var marker2;
             var rectangle;
+            var newrectangle
+            var rectangles = [];
+            var names = []
+
+            function populate_rectangles()
+            {
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (containerData)
+                    {
+                        rectangles = [];
+                        names = [];
+                        for (let i = 1; i < containerData[0].length; i++) {
+                            var bounds = [[containerData[1][i], containerData[2][i]], [containerData[3][i], containerData[4][i]]];
+                            newrectangle = L.rectangle(bounds, {color: containerData[5][i], weight: 1});
+                            rectangles.push(newrectangle);
+                            names.push(containerData[0][i]);
+                        }
+                    }
+                });
+            }
+
+            /*function moveContainer()
+            {
+                var rectangle2;
+                var name = containerToMove()
+                var rowToReplace = 1000;
+                for(let i = 0; i<names.length; i++)
+                {
+                    if(names[i] == name)
+                    {
+                        rectangle2 = rectangles[i];
+                        rectangles[i].remove();
+                        rowToReplace = i;
+                    }
+                }
+                rectangle2.addTo(map);
+                var data = rectangle2.getLatLngs();
+                var width = Math.abs((data[0][0]).lat - (data[0][2]).lat); 
+                var height = Math.abs((data[0][0]).lng - (data[0][2]).lng);
+
+                rectangle2.on({
+                    mousedown: function () {
+                        map.dragging.disable();
+                        map.on('mousemove', function (e) {
+                            bounds[0][0] = e.latlng.lat-(width/2);
+                            bounds[0][1] = e.latlng.lng-(height/2);
+                            bounds[1][0] = e.latlng.lat+(width/2);
+                            bounds[1][1] = e.latlng.lng+(height/2);
+                            rectangle2.setBounds(bounds);
+                        });
+                    }
+                }); 
+                map.on('mouseup',function(e){
+                    map.dragging.enable();
+                    map.removeEventListener('mousemove');
+                    rectangle2.off()
+
+                    var row_to_replace = JSON.stringify(rowToReplace);
+                    var x1 = JSON.stringify((rectangle2.getLatLngs())[0][0].lat);
+                    var x2 = JSON.stringify((rectangle2.getLatLngs())[0][2].lat);
+                    var y1 = JSON.stringify((rectangle2.getLatLngs())[0][0].lng);
+                    var y2 = JSON.stringify((rectangle2.getLatLngs())[0][2].lng);
+            
+                    $.getJSON({
+                            url: '/move_container',
+                            data: {row: row_to_replace, x1:x1, x2:x2, y1:y1, y2:y2},
+                            success: function (data) {
+                            }
+                    });
+                    populate_rectangles()
+                })      
+            }*/
+
+            function moveContainer()
+            {
+                addContainerData2()
+            }
+
+            function publishMarker2()
+            {
+                // Get name of item to add
+                var latFinal1 = Math.round(marker3.getLatLng().lat);
+                var lngFinal1 = Math.round(marker3.getLatLng().lng);
+                var latFinal2 = Math.round(marker2.getLatLng().lat);
+                var lngFinal2 = Math.round(marker2.getLatLng().lng);
+
+                var bounds = [[latFinal1, lngFinal1], [latFinal2, lngFinal2]];
+                rectangle = L.rectangle(bounds, { color: colour, weight: 1 }).addTo(map);
+
+                if (marker2 != null) {
+                    marker2.remove()
+                }
+                if (marker3 != null) {
+                    marker3.remove()
+                }
+
+                var name = containerToMove()
+                var rowToReplace = 1000;
+
+                for(let i = 0; i<names.length; i++)
+                {
+                    if(names[i] == name)
+                    {
+                        rectangle2 = rectangles[i];
+                        rowToReplace = i;
+                    }
+                }
+
+                var latOfItem1 = JSON.stringify(latFinal1);
+                var lngOfItem1 = JSON.stringify(lngFinal1);
+                var latOfItem2 = JSON.stringify(latFinal2);
+                var lngOfItem2 = JSON.stringify(lngFinal2);
+                var rowToReplace = JSON.stringify(rowToReplace)
+
+                $.getJSON({
+                    url: '/move_container',
+                    data: {row: rowToReplace, x1:latOfItem1, x2:latOfItem2, y1:lngOfItem1, y2:lngOfItem2},
+                    success: function (data) {
+                    }
+                });
+            }
 
             $(document).ready(function () {
                 //This makes sure the buttons only are depressed when you are activly clicking them :(
@@ -360,6 +482,7 @@
                     $(this).blur();
                 })
 
+                populate_rectangles()
                 //Display location of item
                 $("#getData").on("click", function () {
                     var name = userInfo()
@@ -458,7 +581,9 @@
                 $.getJSON({
                     url: '/set_values_container',
                     data: { name: nameOfItem, colour: colourOfContainer, lat1: latOfItem1, lng1: lngOfItem1, lat2: latOfItem2, lng2: lngOfItem2 },
-                    success: function (data) { }
+                    success: function (data) { 
+                        populate_rectangles();
+                    }
                 });
                 customAlert("add-alert");
 
@@ -730,6 +855,64 @@
                 enableAddMarker();
             }
 
+            function addContainerData2() {
+                // Get name of item to add
+                name = containerToAdd();
+                //Get colour
+                colour = document.getElementById('container-colour').value;
+
+                // Prompt user to click on screen after hiding the alert for success
+                customAlert("click-alert2");
+                // Get coordinates of item to add
+
+                function enableAddMarker() {
+                    map.on('click', addMarker);
+                }
+
+                function addMarker(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker2 != null) {
+                        marker2.remove()
+                    }
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker2 = L.marker(e.latlng)
+                    marker2.addTo(map);
+                    coords = marker2.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet
+                    enableAddMarker2();
+                }
+
+                function enableAddMarker2() {
+                    customAlert("click-alert3");
+                    map.on('click', addMarker2);
+                }
+
+                function addMarker2(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker3 = L.marker(e.latlng)
+                    marker3.addTo(map);
+                    marker3.bindPopup("Point2").openPopup();
+                    coords2 = marker3.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker2);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet;
+                    publishMarker2();
+                }
+
+                enableAddMarker();
+            }
+
             //Set the bounds to the image size and make the map
             var bounds = [[0, 0], [1000, 1000]];
 
@@ -789,6 +972,13 @@
                 // Ask user for item name
                 var itemName = document.getElementById("container-name").value;
                 document.getElementById("container-name").value = "";
+                return itemName;
+            }
+
+            function containerToMove() {
+                // Ask user for item name
+                var itemName = document.getElementById("move-container-name").value;
+                document.getElementById("move-container-name").value = "";
                 return itemName;
             }
 
