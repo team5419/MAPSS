@@ -26,6 +26,30 @@ creds = service_account.Credentials.from_service_account_file(
 
 app = Flask(__name__)
 
+@app.route('/pick_container', methods=["GET"])
+def pick_container():
+
+    #get data from jquery
+    container = json.loads(request.args.get('container'))
+
+    service = build('sheets', 'v4', credentials=creds)
+
+    # Call the Sheets API
+    sheet = service.spreadsheets()
+
+    value = [[container]]
+    body = {'values': value}
+
+    #get items to change
+    result1 = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
+                                range="digital_organizer", majorDimension="COLUMNS").execute()
+    values = result1.get('values', [])
+
+    # update container
+    service.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range="digital_organizer!G"+str(len(values[0])),
+        valueInputOption="USER_ENTERED", body=body).execute()
+
 @app.route('/move_container', methods=["GET"])
 def move_container():
 

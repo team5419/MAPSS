@@ -595,6 +595,12 @@
                     data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
                     success: function (data) { 
                         //DATA IS AN ARRAY WITH THE NAMES OF THE OVERLAPPING CONTAINERS
+                        $.getJSON({
+                            url: '/pick_container',
+                            data: { container: container },
+                            success: function (data) { 
+                            }
+                        });
                     }
                 });
                 customAlert("add-alert");
