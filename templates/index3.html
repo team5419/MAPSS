@@ -354,11 +354,55 @@
             var marker2;
             var rectangle;
 
-            $(document).ready(function () {
+            function load() {
+                //Clear Alerts
+                customAlert();
+
                 //This makes sure the buttons only are depressed when you are activly clicking them :(
                 $(".btn").mouseup(function () {
                     $(this).blur();
                 })
+
+                //Place all containers on the map at startup
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (data) {
+                        for (let i = 1; i < data[0].length; i++) {
+                            $.getJSON({
+                                url: '/find_items_in_container',
+                                data: { name: JSON.stringify(data[0][i]) },
+                                success: function (data2) {
+                                    /*var popupData = "";
+                                    for (let i = 0; i < data2.length; i++) {
+                                        popupData += "<br>";
+                                        popupData += data2[i];
+                                    }
+                                    var marker1 = L.marker([(parseInt(data[1][i]) + parseInt(data[3][i])) / 2, (parseInt(data[2][i]) + parseInt(data[4][i])) / 2]).addTo(map);
+                                    marker1.bindPopup("<p class='center'><b>" + data[0][i] + "</b>" + popupData + "</p>").openPopup();*/
+                                    var rectangle = L.rectangle([[data[1][i], data[2][i]], [data[3][i], data[4][i]]], { color: data[5][i], weight: 1 }).addTo(map);
+                                    /*rectangle.bindPopup(data[0][i]);*/
+                                }
+                            });
+                        }
+                    }
+                });
+
+                //Autocomplete
+                $.getJSON({
+                    url: '/get_all_data',
+                    success: function (data) {
+                        allNames = data[0];
+                        autocomplete(document.getElementById("find-item-name"), allNames);
+                    }
+                });
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (data) {
+                        allContainers = data[0];
+                        autocomplete(document.getElementById("delete-container-name"), allContainers);
+                        autocomplete(document.getElementById("move-container-name"), allContainers);
+                    }
+                });
 
                 //Display location of item
                 $("#getData").on("click", function () {
@@ -379,7 +423,7 @@
                             }
 
                             for (let i = 0; i < data.length; i++) {
-                                var marker = L.marker([data[i][0], data[i][1]]).addTo(map);
+                                marker = L.marker([data[i][0], data[i][1]]).addTo(map);
                                 marker.bindPopup("<p class='center'><b>" + name + "<br>Shelf Number: " + data[i][4] + "<br>Container: " + data[i][5] + "</p>").openPopup();
                                 $.getJSON({
                                     url: '/get_all_containers',
@@ -395,6 +439,9 @@
                         }
                     });
                 });
+            }
+            $(document).ready(function () {
+                load();
             });
 
             $("#deleteContainer").on("click", function () {
@@ -481,57 +528,6 @@
                 });
                 customAlert("remove-alert");
             }
-
-            // Add data to spreadsheet
-            $(document).ready(function () {
-                customAlert();
-
-            });
-
-            $(document).ready(function () {
-                $.getJSON({
-                    url: '/get_all_containers',
-                    success: function (data) {
-                        for (let i = 1; i < data[0].length; i++) {
-                            $.getJSON({
-                                url: '/find_items_in_container',
-                                data: { name: JSON.stringify(data[0][i]) },
-                                success: function (data2) {
-                                    /*var popupData = "";
-                                    for (let i = 0; i < data2.length; i++) {
-                                        popupData += "<br>";
-                                        popupData += data2[i];
-                                    }
-                                    var marker1 = L.marker([(parseInt(data[1][i]) + parseInt(data[3][i])) / 2, (parseInt(data[2][i]) + parseInt(data[4][i])) / 2]).addTo(map);
-                                    marker1.bindPopup("<p class='center'><b>" + data[0][i] + "</b>" + popupData + "</p>").openPopup();*/
-                                    var rectangle = L.rectangle([[data[1][i], data[2][i]], [data[3][i], data[4][i]]], { color: data[5][i], weight: 1 }).addTo(map);
-                                    /*rectangle.bindPopup(data[0][i]);*/
-                                }
-                            });
-                        }
-                    }
-                });
-            });
-
-            // Get names of all items
-            $(document).ready(function () {
-                $.getJSON({
-                    url: '/get_all_data',
-                    success: function (data) {
-                        allNames = data[0];
-                        autocomplete(document.getElementById("find-item-name"), allNames);
-                    }
-                });
-                $.getJSON({
-                    url: '/get_all_containers',
-                    success: function (data) {
-                        allContainers = data[0];
-                        autocomplete(document.getElementById("delete-container-name"), allContainers);
-                        autocomplete(document.getElementById("move-container-name"), allContainers);
-                    }
-                });
-            });
-
 
             function autocomplete(inp, arr) {
                 /*the autocomplete function takes two arguments,
