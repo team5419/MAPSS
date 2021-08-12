@@ -209,10 +209,11 @@ def set_values():
     y_coordinate = json.loads(request.args.get('lng'))
     shelf_number = json.loads(request.args.get("info"))
     set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number)
-    return
+    return "hi"
 
 
 def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
+    overlapping_containers = []
     name_of_container = "Not on Shelf"
     service = build('sheets', 'v4', credentials=creds)
 
@@ -232,15 +233,23 @@ def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
     for i in range(1, len(containers[0])):
         if int(containers[1][i]) < int(x_coordinate) and int(containers[3][i]) > int(x_coordinate) and int(containers[2][i]) < int(y_coordinate) and int(containers[4][i]) > int(y_coordinate):
             name_of_container = containers[0][i]
+            overlapping_containers.append(name_of_container)
         if int(containers[1][i]) > x_coordinate and int(containers[3][i]) < x_coordinate and int(containers[2][i]) > y_coordinate and int(containers[4][i]) < y_coordinate:
             name_of_container = containers[0][i]
+            overlapping_containers.append(name_of_container)
+        if int(containers[1][i]) > x_coordinate and int(containers[3][i]) < x_coordinate and int(containers[2][i]) < y_coordinate and int(containers[4][i]) > y_coordinate:
+            name_of_container = containers[0][i]
+            overlapping_containers.append(name_of_container)
+        if int(containers[1][i]) < x_coordinate and int(containers[3][i]) > x_coordinate and int(containers[2][i]) > y_coordinate and int(containers[4][i]) < y_coordinate:
+            name_of_container = containers[0][i]
+            overlapping_containers.append(name_of_container)
 
     data = [[name_of_item, x_coordinate, y_coordinate,
              0, 0, shelf_number, name_of_container]]
 
-    request = sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:G1",
+    sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:G1",
                                     valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body={"values": data}).execute()
-    return
+    return jsonify(overlapping_containers)
 
 def get_values2(name_of_item):
 

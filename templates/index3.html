@@ -453,8 +453,6 @@
                 var name = containerToMove()
                 var rowToReplace = 1000;
 
-                window.alert(names)
-
                 for(let i = 0; i<names.length; i++)
                 {
                     if(names[i] == name)
@@ -595,7 +593,9 @@
                 $.getJSON({
                     url: '/set_values',
                     data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
-                    success: function (data) { }
+                    success: function (data) { 
+                        //DATA IS AN ARRAY WITH THE NAMES OF THE OVERLAPPING CONTAINERS
+                    }
                 });
                 customAlert("add-alert");
 
