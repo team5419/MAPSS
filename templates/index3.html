@@ -90,7 +90,7 @@
                         class="material-icons">add_circle_outline</i></button>
                 <button onclick="menuManager('remove')" type="button" class="btn btn-primary"><i
                         class="material-icons">remove_circle_outline</i></button>
-                <button type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
+                <button onclick="menuManager('move')" type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
                 <button onclick="menuManager('edit')" type="button" class="btn btn-primary"><i
                         class="material-icons">edit</i></button>
             </div>
@@ -137,7 +137,7 @@
 
                     }
                     else if (task == "move") {
-
+                        $('#moveContainerModal').modal('show')
                     }
                     else if (task == "edit") {
                         $('#editContainerModal').modal('show')
@@ -320,6 +320,34 @@
             </div>
         </div>
     </div>
+    <!-- Move Container Modal -->
+    <div class="modal fade" id="moveContainerModal" tabindex="-1" role="dialog" aria-labelledby="moveContainerModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="moveContainerModalLabel">Move Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Container Name</label>
+                            <input class="form-control" id="move-container-name" type="text" minlength="1">
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="moveContainer"
+                        data-dismiss="modal">Move</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="mapid">
         <script>
             var marker;
@@ -494,17 +522,16 @@
                         autocomplete(document.getElementById("find-item-name"), allNames);
                     }
                 });
-            });
-
-            $(document).ready(function () {
                 $.getJSON({
                     url: '/get_all_containers',
                     success: function (data) {
                         allContainers = data[0];
                         autocomplete(document.getElementById("delete-container-name"), allContainers);
+                        autocomplete(document.getElementById("move-container-name"), allContainers);
                     }
                 });
             });
+
 
             function autocomplete(inp, arr) {
                 /*the autocomplete function takes two arguments,
