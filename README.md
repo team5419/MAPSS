@@ -31,4 +31,4 @@ You should then go to [`http://127.0.0.1:5000/`](http://127.0.0.1:5000/) in your
 
 ## Contributing
 
-Internal users should make a branch and then a pull request to merge your changes. External users can do the same but start by making a fork. If you dont know how to fix your problem, [make an issue](https://github.com/lemmaammel/itemSorter/issues/new) and a kind coder can help you.
+Internal users should make a branch and then a pull request to merge your changes. External users can do the same but start by making a fork. If you dont know how to fix your problem, [make an issue](https://github.com/team5419/MAPSS/issues/new) and a kind coder can help you.
