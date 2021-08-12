@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <!-- Leaflet CSS file -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.1.0/dist/css/bootstrap-dark.min.css" />
+    <!-- Leaflet JavaScript file -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="/readSheet.py"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
+    <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <!-- Google Icons -->
+    <!-- Search here: https://fonts.google.com/icons?icon.query=search Documentation here: https://developers.google.com/fonts/docs/material_icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <!-- Set Style 😎 -->
+    <style>
+        #mapid {
+            height: 85vh;
+            background: #191d21;
+        }
+
+        .alert {
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        #center {
+            text-align: center;
+        }
+
+        /* Hide the attribution. */
+        .leaflet-control-attribution {
+            visibility: hidden;
+        }
+
+        /* Remove that weird button highlight thing*/
+        .btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* Hide radio button circles */
+        input[type=radio] {
+            visibility: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <!-- Buttons! -->
+        <div class="btn-toolbar d-flex justify-content-center" role="toolbar">
+            <div class="btn-group mr-auto" role="group">
+                <button type="button" class="btn btn-primary" onclick="window.location.href='https://team5419.org/'"><i
+                        class="material-icons">arrow_back</i></button>
+            </div>
+            <!--Radio buttons-->
+            <div class="btn-group mr-3" role="group" data-toggle="buttons">
+                <label class="btn btn-primary form-check-label">
+                    <input name="select-editor" id="edit-marker-btn" class="form-check-input" type="radio" checked
+                        autocomplete="off"><i class="material-icons">place</i>
+                </label>
+                <label class="btn btn-primary form-check-label">
+                    <input name="select-editor" id="edit-container-btn" class="form-check-input" type="radio"
+                        autocomplete="off"><i class="material-icons">check_box_outline_blank</i>
+                </label>
+            </div>
+            <div class="btn-group mr-3" role="group">
+                <!-- When user clicks button, prompts them to select point to add data-->
+                <button onclick="menuManager('add')" type="button" class="btn btn-primary"><i
+                        class="material-icons">add_circle_outline</i></button>
+                <button onclick="menuManager('remove')" type="button" class="btn btn-primary"><i
+                        class="material-icons">remove_circle_outline</i></button>
+                <button type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
+                <button onclick="menuManager('edit')" type="button" class="btn btn-primary"><i
+                        class="material-icons">edit</i></button>
+            </div>
+            <div class="btn-group mr-3" role="group">
+                <!-- <button id="getAllData" type="button" class="btn btn-primary">Display All Items</button> -->
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                    data-target="#locateItemModal">&emsp;&emsp;<i class="material-icons">search</i>&emsp;&emsp;</button>
+            </div>
+            <div class="btn-group ml-auto" role="group">
+                <a class="btn btn-primary" href="/git_pull" role="button"><i class="material-icons">autorenew</i></a>
+                <button type="button" class="btn btn-primary"
+                    onclick="window.open('https://docs.google.com/spreadsheets/d/1Kjpfi7TuhB7UbsIvLi3TQMrF0fJYwV-d2gq1PZ3EVf4/edit#gid=0')"><i
+                        class="material-icons">view_list</i></button>
+                <button type="button" class="btn btn-primary"
+                    onclick="window.open('https://github.com/lemmaammel/itemSorter')"><i
+                        class="material-icons">info</i></button>
+            </div>
+        </div>
+        <script>
+            //This manages the menus and decides which modals to show
+            //This part runs in you are editing the marker
+            function menuManager(task) {
+                if (document.getElementById("edit-marker-btn").checked) {
+                    if (task == "remove") {
+                        removeItem()
+                    }
+                    else if (task == "add") {
+                        $('#newItemModal').modal('show')
+                    }
+                    else if (task == "move") {
+
+                    }
+                    else if (task == "edit") {
+                        $('#editItemModal').modal('show')
+                    }
+                }
+                //This part runs in you are editing the container
+                else if (document.getElementById("edit-container-btn").checked) {
+                    if (task == "remove") {
+                        $('#deleteContainerModal').modal('show')
+                    }
+                    else if (task == "add") {
+                        $('#newContainerModal').modal('show')
+
+                    }
+                    else if (task == "move") {
+
+                    }
+                    else if (task == "edit") {
+                        $('#editContainerModal').modal('show')
+                    }
+                }
+            }
+        </script>
+    </div>
+    <!-- Add New Item Modal -->
+    <div class="modal fade" id="newItemModal" tabindex="-1" role="dialog" aria-labelledby="newItemModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newItemModalLabel">Add New Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Name</label>
+                            <input class="form-control" id="item-name" type="text" minlength="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="shelf-number" class="col-form-label">Shelf</label>
+                            <input class="form-control" id="shelf-number" type="number" min="0" max="1000">
+                            <!-- TODO: Make sure imputs are good -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addData()" data-dismiss="modal">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Item Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Name</label>
+                            <input class="form-control" id="edit-item-name" type="text" minlength="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="shelf-number" class="col-form-label">Shelf</label>
+                            <input class="form-control" id="edit-shelf-number" type="number" min="0" max="1000">
+                            <!-- TODO: Make sure imputs are good -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="" data-dismiss="modal">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add New Container Modal -->
+    <div class="modal fade" id="newContainerModal" tabindex="-1" role="dialog" aria-labelledby="newContainerModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newContainerModalLabel">Add New Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Name</label>
+                            <input class="form-control" id="container-name" type="text" minlength="1">
+                        </div>
+                    </form>
+                    <div>
+                        <label for="item-name" class="col-form-label">Colour</label>
+                        <input class="form-control" type="color" id="container-colour" name="head" value="#33FFA7">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addContainerData()"
+                        data-dismiss="modal">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Container Modal -->
+    <div class="modal fade" id="editContainerModal" tabindex="-1" role="dialog" aria-labelledby="editContainerModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editContainerModalLabel">Edit Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Name</label>
+                            <input class="form-control" id="edit-container-name" type="text" minlength="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="" data-dismiss="modal">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Locate Item Modal -->
+    <div class="modal fade" id="locateItemModal" tabindex="-1" role="dialog" aria-labelledby="locateItemModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="locateItemModalLabel">Locate Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Item Name</label>
+                            <input class="form-control" id="find-item-name" type="text" minlength="1">
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="getData" data-dismiss="modal">Locate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Container Modal -->
+    <div class="modal fade" id="deleteContainerModal" tabindex="-1" role="dialog" aria-labelledby="deleteContainerModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteContainerModalLabel">Delete Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Container Name</label>
+                            <input class="form-control" id="delete-container-name" type="text" minlength="1">
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="deleteContainer"
+                        data-dismiss="modal">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mapid">
+        <script>
+            var marker;
+            var marker2;
+            var rectangle;
+
+            $(document).ready(function () {
+                //This makes sure the buttons only are depressed when you are activly clicking them :(
+                $(".btn").mouseup(function () {
+                    $(this).blur();
+                })
+
+                //Display location of item
+                $("#getData").on("click", function () {
+                    var name = userInfo()
+                    var js_data = JSON.stringify(name);
+                    $.getJSON({
+                        url: '/get_values',
+                        data: { name: js_data },
+                        success: function (data) {
+                            if (data == 0) {
+                                customAlert("fail-alert")
+                            }
+                            if (marker != null) {
+                                marker.remove()
+                            }
+                            if (marker2 != null) {
+                                marker2.remove()
+                            }
+
+                            for (let i = 0; i < data.length; i++) {
+                                var marker = L.marker([data[i][0], data[i][1]]).addTo(map);
+                                marker.bindPopup("<p class='center'><b>" + name + "<br>Shelf Number: " + data[i][4] + "<br>Container: " + data[i][5] + "</p>").openPopup();
+                                $.getJSON({
+                                    url: '/get_all_containers',
+                                    success: function (containerData) {
+                                        for (let i = 1; i < containerData[0].length; i++) {
+                                            if (data[i][5] == containerData[0][i]) {
+                                                rectangle = L.rectangle([[containerData[1][i], containerData[2][i]], [containerData[3][i], containerData[4][i]]]).addTo(map);
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+
+            $("#deleteContainer").on("click", function () {
+                var name = containerToDelete();
+                var js_data = JSON.stringify(name);
+                $.getJSON({
+                    url: '/delete_container',
+                    data: { name: js_data },
+                    success: function (data) { }
+                });
+            });
+
+            var name;
+            var colour
+            var info;
+
+            //Send marker to spreadsheet
+            function publishMarker() {
+
+                // Get name of item to add
+                var latFinal = Math.round(marker2.getLatLng().lat);
+                var lngFinal = Math.round(marker2.getLatLng().lng);
+
+                var nameOfItem = JSON.stringify(name);
+                var latOfItem = JSON.stringify(latFinal);
+                var lngOfItem = JSON.stringify(lngFinal);
+                $.getJSON({
+                    url: '/set_values',
+                    data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
+                    success: function (data) { }
+                });
+                customAlert("add-alert");
+
+            }
+
+            function publishContainer() {
+
+                // Get name of item to add
+                var latFinal1 = Math.round(marker3.getLatLng().lat);
+                var lngFinal1 = Math.round(marker3.getLatLng().lng);
+                var latFinal2 = Math.round(marker2.getLatLng().lat);
+                var lngFinal2 = Math.round(marker2.getLatLng().lng);
+
+                var bounds = [[latFinal1, lngFinal1], [latFinal2, lngFinal2]];
+                rectangle = L.rectangle(bounds, { color: colour, weight: 1 }).addTo(map);
+
+                if (marker2 != null) {
+                    marker2.remove()
+                }
+                if (marker3 != null) {
+                    marker3.remove()
+                }
+
+                var nameOfItem = JSON.stringify(name);
+                var colourOfContainer = JSON.stringify(colour);
+                var latOfItem1 = JSON.stringify(latFinal1);
+                var lngOfItem1 = JSON.stringify(lngFinal1);
+                var latOfItem2 = JSON.stringify(latFinal2);
+                var lngOfItem2 = JSON.stringify(lngFinal2);
+
+                $.getJSON({
+                    url: '/set_values_container',
+                    data: { name: nameOfItem, colour: colourOfContainer, lat1: latOfItem1, lng1: lngOfItem1, lat2: latOfItem2, lng2: lngOfItem2 },
+                    success: function (data) { }
+                });
+                customAlert("add-alert");
+
+            }
+
+            function removeItem() {
+                // Remove item from spreadsheet
+                var latFinal = Math.round(marker.getLatLng().lat);
+                var lngFinal = Math.round(marker.getLatLng().lng);
+                marker.remove()
+
+                var latOfItem = JSON.stringify(latFinal);
+                var lngOfItem = JSON.stringify(lngFinal);
+
+                $.getJSON({
+                    url: '/remove_values',
+                    data: { lat: latOfItem, lng: lngOfItem },
+                    success: function (data) {
+                    }
+                });
+                customAlert("remove-alert");
+            }
+
+            // Add data to spreadsheet
+            $(document).ready(function () {
+                customAlert();
+
+            });
+
+            $(document).ready(function () {
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (data) {
+                        for (let i = 1; i < data[0].length; i++) {
+                            $.getJSON({
+                                url: '/find_items_in_container',
+                                data: { name: JSON.stringify(data[0][i]) },
+                                success: function (data2) {
+                                    /*var popupData = "";
+                                    for (let i = 0; i < data2.length; i++) {
+                                        popupData += "<br>";
+                                        popupData += data2[i];
+                                    }
+                                    var marker1 = L.marker([(parseInt(data[1][i]) + parseInt(data[3][i])) / 2, (parseInt(data[2][i]) + parseInt(data[4][i])) / 2]).addTo(map);
+                                    marker1.bindPopup("<p class='center'><b>" + data[0][i] + "</b>" + popupData + "</p>").openPopup();*/
+                                    var rectangle = L.rectangle([[data[1][i], data[2][i]], [data[3][i], data[4][i]]], { color: data[5][i], weight: 1 }).addTo(map);
+                                    /*rectangle.bindPopup(data[0][i]);*/
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Get names of all items
+            $(document).ready(function () {
+                $.getJSON({
+                    url: '/get_all_data',
+                    success: function (data) {
+                        allNames = data[0];
+                        autocomplete(document.getElementById("find-item-name"), allNames);
+                    }
+                });
+            });
+
+            $(document).ready(function () {
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (data) {
+                        allContainers = data[0];
+                        autocomplete(document.getElementById("delete-container-name"), allContainers);
+                    }
+                });
+            });
+
+            function autocomplete(inp, arr) {
+                /*the autocomplete function takes two arguments,
+                the text field element and an array of possible autocompleted values:*/
+                var currentFocus;
+                /*execute a function when someone writes in the text field:*/
+                inp.addEventListener("input", function (e) {
+                    var a, b, i, val = this.value;
+                    /*close any already open lists of autocompleted values*/
+                    closeAllLists();
+                    if (!val) { return false; }
+                    currentFocus = -1;
+                    /*create a DIV element that will contain the items (values):*/
+                    a = document.createElement("DIV");
+                    a.setAttribute("id", this.id + "autocomplete-list");
+                    a.setAttribute("class", "autocomplete-items");
+                    /*append the DIV element as a child of the autocomplete container:*/
+                    this.parentNode.appendChild(a);
+                    /*for each item in the array...*/
+                    for (i = 0; i < arr.length; i++) {
+                        /*check if the item starts with the same letters as the text field value:*/
+                        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                            /*create a DIV element for each matching element:*/
+                            b = document.createElement("DIV");
+                            /*make the matching letters bold:*/
+                            b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+                            b.innerHTML += arr[i].substr(val.length);
+                            /*insert a input field that will hold the current array item's value:*/
+                            b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                            /*execute a function when someone clicks on the item value (DIV element):*/
+                            b.addEventListener("click", function (e) {
+                                /*insert the value for the autocomplete text field:*/
+                                inp.value = this.getElementsByTagName("input")[0].value;
+                                /*close the list of autocompleted values,
+                                (or any other open lists of autocompleted values:*/
+                                closeAllLists();
+                            });
+                            a.appendChild(b);
+                        }
+                    }
+                });
+                /*execute a function presses a key on the keyboard:*/
+                inp.addEventListener("keydown", function (e) {
+                    var x = document.getElementById(this.id + "autocomplete-list");
+                    if (x) x = x.getElementsByTagName("div");
+                    if (e.keyCode == 40) {
+                        /*If the arrow DOWN key is pressed,
+                        increase the currentFocus variable:*/
+                        currentFocus++;
+                        /*and and make the current item more visible:*/
+                        addActive(x);
+                    } else if (e.keyCode == 38) { //up
+                        /*If the arrow UP key is pressed,
+                        decrease the currentFocus variable:*/
+                        currentFocus--;
+                        /*and and make the current item more visible:*/
+                        addActive(x);
+                    } else if (e.keyCode == 13) {
+                        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                        e.preventDefault();
+                        if (currentFocus > -1) {
+                            /*and simulate a click on the "active" item:*/
+                            if (x) x[currentFocus].click();
+                        }
+                    }
+                });
+                function addActive(x) {
+                    /*a function to classify an item as "active":*/
+                    if (!x) return false;
+                    /*start by removing the "active" class on all items:*/
+                    removeActive(x);
+                    if (currentFocus >= x.length) currentFocus = 0;
+                    if (currentFocus < 0) currentFocus = (x.length - 1);
+                    /*add class "autocomplete-active":*/
+                    x[currentFocus].classList.add("autocomplete-active");
+                }
+                function removeActive(x) {
+                    /*a function to remove the "active" class from all autocomplete items:*/
+                    for (var i = 0; i < x.length; i++) {
+                        x[i].classList.remove("autocomplete-active");
+                    }
+                }
+                function closeAllLists(elmnt) {
+                    /*close all autocomplete lists in the document,
+                    except the one passed as an argument:*/
+                    var x = document.getElementsByClassName("autocomplete-items");
+                    for (var i = 0; i < x.length; i++) {
+                        if (elmnt != x[i] && elmnt != inp) {
+                            x[i].parentNode.removeChild(x[i]);
+                        }
+                    }
+                }
+                /*execute a function when someone clicks in the document:*/
+                document.addEventListener("click", function (e) {
+                    closeAllLists(e.target);
+                });
+            }
+
+            // Add an example marker
+            var coords;
+            function addData() {
+                // Get name of item to add
+                name = itemToAdd();
+                info = shelfNumber();
+
+                // Prompt user to click on screen after hiding the alert for success
+                customAlert("click-alert");
+                // Get coordinates of item to add
+
+                function enableAddMarker() {
+                    map.on('click', addMarker);
+                }
+
+                function addMarker(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker2 != null) {
+                        marker2.remove()
+                    }
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker2 = L.marker(e.latlng)
+                    marker2.addTo(map);
+                    marker2.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p>").openPopup();
+                    coords = marker2.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet
+                    publishMarker();
+                    return marker2;
+                }
+                enableAddMarker();
+            }
+
+
+            var coords1;
+            var coords2;
+            var colour;
+            function addContainerData() {
+                // Get name of item to add
+                name = containerToAdd();
+                //Get colour
+                colour = document.getElementById('container-colour').value;
+
+                // Prompt user to click on screen after hiding the alert for success
+                customAlert("click-alert2");
+                // Get coordinates of item to add
+
+                function enableAddMarker() {
+                    map.on('click', addMarker);
+                }
+
+                function addMarker(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker2 != null) {
+                        marker2.remove()
+                    }
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker2 = L.marker(e.latlng)
+                    marker2.addTo(map);
+                    coords = marker2.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet
+                    enableAddMarker2();
+                }
+
+                function enableAddMarker2() {
+                    customAlert("click-alert3");
+                    map.on('click', addMarker2);
+                }
+
+                function addMarker2(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker3 = L.marker(e.latlng)
+                    marker3.addTo(map);
+                    marker3.bindPopup("Point2").openPopup();
+                    coords2 = marker3.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker2);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet;
+                    publishContainer();
+                }
+
+                enableAddMarker();
+            }
+
+            //Set the bounds to the image size and make the map
+            var bounds = [[0, 0], [1000, 1000]];
+
+            //This code used to send the map size automagicly but the map is currently a square so we can disable
+            /*
+            var img = new Image();
+            img.src = '/static/roboticsMap.png';
+
+            bounds = [[0, 0], [img.height, img.width]];
+            */
+
+            var map = L.map('mapid', { crs: L.CRS.Simple, minZoom: -6 });
+
+            // Add image to map
+            var image = L.imageOverlay('/static/roboticsMap.png', bounds).addTo(map);
+            map.fitBounds(bounds);
+
+            // Add tile layer
+            //L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+
+            // Function to get user input for finding item
+            function userInfo() {
+                // Ask user for item name
+                var itemName = document.getElementById("find-item-name").value;
+                document.getElementById("find-item-name").value = "";
+                return itemName;
+            }
+
+            function xCoordinate() {
+                // Ask user for item name
+                var itemName = window.prompt("Enter the x-coordinate of the item you wish to locate:");
+                return itemName;
+            }
+
+            function yCoordinate() {
+                // Ask user for item name
+                var itemName = window.prompt("Enter the y-coordinate of the item you wish to locate:");
+                return itemName;
+            }
+
+            function shelfNumber() {
+                // Ask user for item name
+                var itemName = document.getElementById("shelf-number").value;
+                document.getElementById("shelf-number").value = "";
+                return itemName;
+            }
+
+            // Function to get user input for adding item
+            function itemToAdd() {
+                // Ask user for item name
+                var itemName = document.getElementById("item-name").value;
+                document.getElementById("item-name").value = "";
+                return itemName;
+            }
+
+            function containerToAdd() {
+                // Ask user for item name
+                var itemName = document.getElementById("container-name").value;
+                document.getElementById("container-name").value = "";
+                return itemName;
+            }
+
+            function colorToAdd() {
+                // Ask user for item name
+                var itemName = document.getElementById("container-name").value;
+                document.getElementById("container-name").value = "";
+                return itemName;
+            }
+
+            function containerToDelete() {
+                // Ask user for item name
+                var itemName = document.getElementById("delete-container-name").value;
+                document.getElementById("delete-container-name").value = "";
+                return itemName;
+            }
+
+            function customAlert(alert) {
+                $('.alert').each(function (i, obj) {
+                    $(obj).hide();
+                });
+                if (alert != null) {
+                    $('#' + alert).show();
+                }
+
+            }
+
+        </script>
+
+    </div>
+    <!-- Different alerts to give instructions to users -->
+    <div id="click-alert" class="alert alert-info" role="alert">
+        <p style="text-align: center;">Please click location you would like to add an item.</p>
+    </div>
+    <div id="click-alert2" class="alert alert-info" role="alert">
+        <p style="text-align: center;">Please click the first corner of your container box.</p>
+    </div>
+    <div id="click-alert3" class="alert alert-info" role="alert">
+        <p style="text-align: center;">Please click the second corner of your container box.</p>
+    </div>
+    <div id="add-alert" class="alert alert-info" role="alert">
+        <p style="text-align: center;">Done! Your item has been added!</p>
+    </div>
+    <div id="remove-alert" class="alert alert-info" role="alert">
+        <p style="text-align: center;">Done! Your item has been removed!</p>
+    </div>
+    <div id="fail-alert" class="alert alert-warning" role="alert">
+        <p style="text-align: center;">Sorry, that item does not exist. If you would like to add an item, click on "Add
+            New Item".</p>
+    </div>
+</body>
+
+</html>
