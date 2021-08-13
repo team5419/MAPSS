@@ -229,15 +229,16 @@ def set_values_container_2(name_of_item, colour_of_item, x_coordinate1, y_coordi
 
 @app.route("/set_values", methods=["GET"])
 def set_values():
+    img = json.loads(request.args.get('img'))
     name_of_item = json.loads(request.args.get('name'))
     x_coordinate = json.loads(request.args.get('lat'))
     y_coordinate = json.loads(request.args.get('lng'))
     shelf_number = json.loads(request.args.get("info"))
-    hi = set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number)
+    hi = set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number, img)
     return hi
 
 
-def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
+def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number, img):
 
     overlapping_containers = []
     name_of_container = "Not on Shelf"
@@ -271,9 +272,9 @@ def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
             overlapping_containers.append(name_of_container)
 
     data = [[name_of_item, x_coordinate, y_coordinate,
-             0, 0, shelf_number, name_of_container]]
+             0, 0, shelf_number, name_of_container, img]]
 
-    sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:G1",
+    sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:H1",
                                     valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body={"values": data}).execute()
     return jsonify(overlapping_containers)
 
@@ -304,7 +305,7 @@ def get_values2(name_of_item):
     # loop through rows of spreadsheet to get information
     for index in index:
         values_of_item = []
-        for i in range(1, 7):
+        for i in range(1, 8):
             values_of_item.append(values[i][index])
         values_to_return.append(values_of_item)
 
