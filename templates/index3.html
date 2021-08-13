@@ -14,7 +14,6 @@
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="/readSheet.py"></script>
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -90,7 +89,8 @@
                         class="material-icons">add_circle_outline</i></button>
                 <button onclick="menuManager('remove')" type="button" class="btn btn-primary"><i
                         class="material-icons">remove_circle_outline</i></button>
-                <button type="button" class="btn btn-primary"><i class="material-icons">open_with</i></button>
+                <button onclick="menuManager('move')" type="button" class="btn btn-primary"><i
+                        class="material-icons">open_with</i></button>
                 <button onclick="menuManager('edit')" type="button" class="btn btn-primary"><i
                         class="material-icons">edit</i></button>
             </div>
@@ -137,7 +137,7 @@
 
                     }
                     else if (task == "move") {
-
+                        $('#moveContainerModal').modal('show')
                     }
                     else if (task == "edit") {
                         $('#editContainerModal').modal('show')
@@ -320,17 +320,241 @@
             </div>
         </div>
     </div>
+    <!-- Move Container Modal -->
+    <div class="modal fade" id="moveContainerModal" tabindex="-1" role="dialog" aria-labelledby="moveContainerModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="moveContainerModalLabel">Move Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Container Name</label>
+                            <input class="form-control" id="move-container-name" type="text" minlength="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="moveContainer()"
+                        data-dismiss="modal">Move</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Overlapping Container Modal -->
+    <div class="modal fade" id="overlapContainerModal" tabindex="-1" role="dialog"
+        aria-labelledby="overlapContainerModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="overlapContainerModalLabel">You have placed an item in an area with
+                        multiple containers</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="item-name" class="col-form-label">Choose a container for your item: </label>
+                            <select name="containers" id="overlapContainerName">
+                                <script>
+                                    function addOverlapList(list) {
+                                        for (let i = 0; i < list.length; i++) {
+                                            document.getElementById('overlapContainerName').innerHTML += '<option value="' + i + '">' + list[i] + '</option>';
+                                        }
+                                    }
+                                </script>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="OverlapContainer" data-dismiss="modal">Add
+                        Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="mapid">
         <script>
             var marker;
             var marker2;
             var rectangle;
+            var newrectangle
+            var rectangles = [];
+            var names = []
 
-            $(document).ready(function () {
+
+            function populate_rectangles() {
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (containerData) {
+                        rectangles = [];
+                        names = [];
+                        for (let i = 1; i < containerData[0].length; i++) {
+                            var bounds = [[containerData[1][i], containerData[2][i]], [containerData[3][i], containerData[4][i]]];
+                            newrectangle = L.rectangle(bounds, { color: containerData[5][i], weight: 1 });
+                            rectangles.push(newrectangle);
+                            names.push(containerData[0][i]);
+                        }
+                    }
+                });
+            }
+
+            /*function moveContainer()
+            {
+                var rectangle2;
+                var name = containerToMove()
+                var rowToReplace = 1000;
+                for(let i = 0; i<names.length; i++)
+                {
+                    if(names[i] == name)
+                    {
+                        rectangle2 = rectangles[i];
+                        rectangles[i].remove();
+                        rowToReplace = i;
+                    }
+                }
+                rectangle2.addTo(map);
+                var data = rectangle2.getLatLngs();
+                var width = Math.abs((data[0][0]).lat - (data[0][2]).lat); 
+                var height = Math.abs((data[0][0]).lng - (data[0][2]).lng);
+
+                rectangle2.on({
+                    mousedown: function () {
+                        map.dragging.disable();
+                        map.on('mousemove', function (e) {
+                            bounds[0][0] = e.latlng.lat-(width/2);
+                            bounds[0][1] = e.latlng.lng-(height/2);
+                            bounds[1][0] = e.latlng.lat+(width/2);
+                            bounds[1][1] = e.latlng.lng+(height/2);
+                            rectangle2.setBounds(bounds);
+                        });
+                    }
+                }); 
+                map.on('mouseup',function(e){
+                    map.dragging.enable();
+                    map.removeEventListener('mousemove');
+                    rectangle2.off()
+
+                    var row_to_replace = JSON.stringify(rowToReplace);
+                    var x1 = JSON.stringify((rectangle2.getLatLngs())[0][0].lat);
+                    var x2 = JSON.stringify((rectangle2.getLatLngs())[0][2].lat);
+                    var y1 = JSON.stringify((rectangle2.getLatLngs())[0][0].lng);
+                    var y2 = JSON.stringify((rectangle2.getLatLngs())[0][2].lng);
+            
+                    $.getJSON({
+                            url: '/move_container',
+                            data: {row: row_to_replace, x1:x1, x2:x2, y1:y1, y2:y2},
+                            success: function (data) {
+                            }
+                    });
+                    populate_rectangles()
+                })      
+            }*/
+
+            function moveContainer() {
+                addContainerData2()
+            }
+
+            function publishMarker2() {
+                // Get name of item to add
+                var latFinal1 = Math.round(marker3.getLatLng().lat);
+                var lngFinal1 = Math.round(marker3.getLatLng().lng);
+                var latFinal2 = Math.round(marker2.getLatLng().lat);
+                var lngFinal2 = Math.round(marker2.getLatLng().lng);
+
+                var bounds = [[latFinal1, lngFinal1], [latFinal2, lngFinal2]];
+                rectangle = L.rectangle(bounds, { color: colour, weight: 1 }).addTo(map);
+
+                if (marker2 != null) {
+                    marker2.remove()
+                }
+                if (marker3 != null) {
+                    marker3.remove()
+                }
+
+                var name = containerToMove()
+                var rowToReplace = 1000;
+
+                for (let i = 0; i < names.length; i++) {
+                    if (names[i] == name) {
+                        rectangle2 = rectangles[i];
+                        rowToReplace = i;
+                    }
+                }
+
+                var latOfItem1 = JSON.stringify(latFinal1);
+                var lngOfItem1 = JSON.stringify(lngFinal1);
+                var latOfItem2 = JSON.stringify(latFinal2);
+                var lngOfItem2 = JSON.stringify(lngFinal2);
+                var rowToReplace = JSON.stringify(rowToReplace)
+
+                $.getJSON({
+                    url: '/move_container',
+                    data: { row: rowToReplace, x1: latOfItem1, x2: latOfItem2, y1: lngOfItem1, y2: lngOfItem2 },
+                    success: function (data) {
+                    }
+                });
+            }
+
+            function load() {
+                //Clear Alerts
+                customAlert();
+                populate_rectangles()
                 //This makes sure the buttons only are depressed when you are activly clicking them :(
                 $(".btn").mouseup(function () {
                     $(this).blur();
                 })
+
+                //Place all containers on the map at startup
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (data) {
+                        for (let i = 1; i < data[0].length; i++) {
+                            $.getJSON({
+                                url: '/find_items_in_container',
+                                data: { name: JSON.stringify(data[0][i]) },
+                                success: function (data2) {
+                                    /*var popupData = "";
+                                    for (let i = 0; i < data2.length; i++) {
+                                        popupData += "<br>";
+                                        popupData += data2[i];
+                                    }
+                                    var marker1 = L.marker([(parseInt(data[1][i]) + parseInt(data[3][i])) / 2, (parseInt(data[2][i]) + parseInt(data[4][i])) / 2]).addTo(map);
+                                    marker1.bindPopup("<p class='center'><b>" + data[0][i] + "</b>" + popupData + "</p>").openPopup();*/
+                                    var rectangle = L.rectangle([[data[1][i], data[2][i]], [data[3][i], data[4][i]]], { color: data[5][i], weight: 1 }).addTo(map);
+                                    /*rectangle.bindPopup(data[0][i]);*/
+                                }
+                            });
+                        }
+                    }
+                });
+
+                //Autocomplete
+                $.getJSON({
+                    url: '/get_all_data',
+                    success: function (data) {
+                        allNames = data[0];
+                        autocomplete(document.getElementById("find-item-name"), allNames);
+                    }
+                });
+                $.getJSON({
+                    url: '/get_all_containers',
+                    success: function (data) {
+                        allContainers = data[0];
+                        autocomplete(document.getElementById("delete-container-name"), allContainers);
+                        autocomplete(document.getElementById("move-container-name"), allContainers);
+                    }
+                });
 
                 //Display location of item
                 $("#getData").on("click", function () {
@@ -351,7 +575,7 @@
                             }
 
                             for (let i = 0; i < data.length; i++) {
-                                var marker = L.marker([data[i][0], data[i][1]]).addTo(map);
+                                marker = L.marker([data[i][0], data[i][1]]).addTo(map);
                                 marker.bindPopup("<p class='center'><b>" + name + "<br>Shelf Number: " + data[i][4] + "<br>Container: " + data[i][5] + "</p>").openPopup();
                                 $.getJSON({
                                     url: '/get_all_containers',
@@ -367,6 +591,9 @@
                         }
                     });
                 });
+            }
+            $(document).ready(function () {
+                load();
             });
 
             $("#deleteContainer").on("click", function () {
@@ -393,13 +620,37 @@
                 var nameOfItem = JSON.stringify(name);
                 var latOfItem = JSON.stringify(latFinal);
                 var lngOfItem = JSON.stringify(lngFinal);
+
                 $.getJSON({
                     url: '/set_values',
                     data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
-                    success: function (data) { }
+                    success: function (data) 
+                    {
+                        var containter;
+                        if (data.length > 1) {
+                            addOverlapList(data);
+                            $('#overlapContainerModal').modal('show')
+                            const btn = document.querySelector('#OverlapContainer');
+                            const sb = document.querySelector('#overlapContainerName')
+                            btn.onclick = (event) => {
+                                event.preventDefault();
+                                containter = JSON.stringify(data[sb.value]);
+                                setOverlapContainer(containter)
+                            };
+                        }
+                    }
                 });
                 customAlert("add-alert");
+            }
 
+            function setOverlapContainer(containter)
+            {
+                $.getJSON({
+                    url: '/pick_container',
+                    data: { container: containter },
+                    success: function (data2) {
+                    }
+                });
             }
 
             function publishContainer() {
@@ -430,7 +681,9 @@
                 $.getJSON({
                     url: '/set_values_container',
                     data: { name: nameOfItem, colour: colourOfContainer, lat1: latOfItem1, lng1: lngOfItem1, lat2: latOfItem2, lng2: lngOfItem2 },
-                    success: function (data) { }
+                    success: function (data) {
+                        populate_rectangles();
+                    }
                 });
                 customAlert("add-alert");
 
@@ -453,58 +706,6 @@
                 });
                 customAlert("remove-alert");
             }
-
-            // Add data to spreadsheet
-            $(document).ready(function () {
-                customAlert();
-
-            });
-
-            $(document).ready(function () {
-                $.getJSON({
-                    url: '/get_all_containers',
-                    success: function (data) {
-                        for (let i = 1; i < data[0].length; i++) {
-                            $.getJSON({
-                                url: '/find_items_in_container',
-                                data: { name: JSON.stringify(data[0][i]) },
-                                success: function (data2) {
-                                    /*var popupData = "";
-                                    for (let i = 0; i < data2.length; i++) {
-                                        popupData += "<br>";
-                                        popupData += data2[i];
-                                    }
-                                    var marker1 = L.marker([(parseInt(data[1][i]) + parseInt(data[3][i])) / 2, (parseInt(data[2][i]) + parseInt(data[4][i])) / 2]).addTo(map);
-                                    marker1.bindPopup("<p class='center'><b>" + data[0][i] + "</b>" + popupData + "</p>").openPopup();*/
-                                    var rectangle = L.rectangle([[data[1][i], data[2][i]], [data[3][i], data[4][i]]], { color: data[5][i], weight: 1 }).addTo(map);
-                                    /*rectangle.bindPopup(data[0][i]);*/
-                                }
-                            });
-                        }
-                    }
-                });
-            });
-
-            // Get names of all items
-            $(document).ready(function () {
-                $.getJSON({
-                    url: '/get_all_data',
-                    success: function (data) {
-                        allNames = data[0];
-                        autocomplete(document.getElementById("find-item-name"), allNames);
-                    }
-                });
-            });
-
-            $(document).ready(function () {
-                $.getJSON({
-                    url: '/get_all_containers',
-                    success: function (data) {
-                        allContainers = data[0];
-                        autocomplete(document.getElementById("delete-container-name"), allContainers);
-                    }
-                });
-            });
 
             function autocomplete(inp, arr) {
                 /*the autocomplete function takes two arguments,
@@ -703,6 +904,64 @@
                 enableAddMarker();
             }
 
+            function addContainerData2() {
+                // Get name of item to add
+                name = containerToAdd();
+                //Get colour
+                colour = document.getElementById('container-colour').value;
+
+                // Prompt user to click on screen after hiding the alert for success
+                customAlert("click-alert2");
+                // Get coordinates of item to add
+
+                function enableAddMarker() {
+                    map.on('click', addMarker);
+                }
+
+                function addMarker(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker2 != null) {
+                        marker2.remove()
+                    }
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker2 = L.marker(e.latlng)
+                    marker2.addTo(map);
+                    coords = marker2.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet
+                    enableAddMarker2();
+                }
+
+                function enableAddMarker2() {
+                    customAlert("click-alert3");
+                    map.on('click', addMarker2);
+                }
+
+                function addMarker2(e) {
+                    //Check if there is a marker there and remove it before adding the new one
+                    if (marker != null) {
+                        marker.remove()
+                    }
+                    marker3 = L.marker(e.latlng)
+                    marker3.addTo(map);
+                    marker3.bindPopup("Point2").openPopup();
+                    coords2 = marker3.getLatLng();
+                    //window.customAlert(coords)
+                    map.off('click', addMarker2);
+                    //Hide the alert telling them to click
+                    customAlert();
+                    //Send the marker to the spreadsheet;
+                    publishMarker2();
+                }
+
+                enableAddMarker();
+            }
+
             //Set the bounds to the image size and make the map
             var bounds = [[0, 0], [1000, 1000]];
 
@@ -762,6 +1021,13 @@
                 // Ask user for item name
                 var itemName = document.getElementById("container-name").value;
                 document.getElementById("container-name").value = "";
+                return itemName;
+            }
+
+            function containerToMove() {
+                // Ask user for item name
+                var itemName = document.getElementById("move-container-name").value;
+                document.getElementById("move-container-name").value = "";
                 return itemName;
             }
 
