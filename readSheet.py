@@ -210,7 +210,7 @@ def set_values_container():
     y_coordinate2 = json.loads(request.args.get('lng2'))
     set_values_container_2(name_of_item, colour_of_item,
                            x_coordinate1, y_coordinate1, x_coordinate2, y_coordinate2)
-    return
+    return 'success'
 
 
 def set_values_container_2(name_of_item, colour_of_item, x_coordinate1, y_coordinate1, x_coordinate2, y_coordinate2):
