@@ -386,7 +386,7 @@
     <div id="mapid">
         <script>
             var marker;
-            var marker2;
+            var marker;
             var rectangle;
             var newrectangle
             var rectangles = [];
@@ -465,18 +465,18 @@
                 addContainerData2()
             }
 
-            function publishMarker2() {
+            function publishmarker() {
                 // Get name of item to add
                 var latFinal1 = Math.round(marker3.getLatLng().lat);
                 var lngFinal1 = Math.round(marker3.getLatLng().lng);
-                var latFinal2 = Math.round(marker2.getLatLng().lat);
-                var lngFinal2 = Math.round(marker2.getLatLng().lng);
+                var latFinal2 = Math.round(marker.getLatLng().lat);
+                var lngFinal2 = Math.round(marker.getLatLng().lng);
 
                 var bounds = [[latFinal1, lngFinal1], [latFinal2, lngFinal2]];
                 rectangle = L.rectangle(bounds, { color: colour, weight: 1 }).addTo(map);
 
-                if (marker2 != null) {
-                    marker2.remove()
+                if (marker != null) {
+                    marker.remove()
                 }
                 if (marker3 != null) {
                     marker3.remove()
@@ -570,8 +570,8 @@
                             if (marker != null) {
                                 marker.remove()
                             }
-                            if (marker2 != null) {
-                                marker2.remove()
+                            if (marker != null) {
+                                marker.remove()
                             }
 
                             for (let i = 0; i < data.length; i++) {
@@ -604,8 +604,8 @@
             function publishMarker() {
 
                 // Get name of item to add
-                var latFinal = Math.round(marker2.getLatLng().lat);
-                var lngFinal = Math.round(marker2.getLatLng().lng);
+                var latFinal = Math.round(marker.getLatLng().lat);
+                var lngFinal = Math.round(marker.getLatLng().lng);
 
                 var nameOfItem = JSON.stringify(name);
                 var latOfItem = JSON.stringify(latFinal);
@@ -648,14 +648,14 @@
                 // Get name of item to add
                 var latFinal1 = Math.round(marker3.getLatLng().lat);
                 var lngFinal1 = Math.round(marker3.getLatLng().lng);
-                var latFinal2 = Math.round(marker2.getLatLng().lat);
-                var lngFinal2 = Math.round(marker2.getLatLng().lng);
+                var latFinal2 = Math.round(marker.getLatLng().lat);
+                var lngFinal2 = Math.round(marker.getLatLng().lng);
 
                 var bounds = [[latFinal1, lngFinal1], [latFinal2, lngFinal2]];
                 rectangle = L.rectangle(bounds, { color: colour, weight: 1 }).addTo(map);
 
-                if (marker2 != null) {
-                    marker2.remove()
+                if (marker != null) {
+                    marker.remove()
                 }
                 if (marker3 != null) {
                     marker3.remove()
@@ -811,23 +811,23 @@
 
                 function addMarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
-                    if (marker2 != null) {
-                        marker2.remove()
+                    if (marker != null) {
+                        marker.remove()
                     }
                     if (marker != null) {
                         marker.remove()
                     }
-                    marker2 = L.marker(e.latlng)
-                    marker2.addTo(map);
-                    marker2.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p>").openPopup();
-                    coords = marker2.getLatLng();
+                    marker = L.marker(e.latlng)
+                    marker.addTo(map);
+                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p>").openPopup();
+                    coords = marker.getLatLng();
                     //window.customAlert(coords)
                     map.off('click', addMarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet
                     publishMarker();
-                    return marker2;
+                    return marker;
                 }
                 enableAddMarker();
             }
@@ -852,29 +852,29 @@
 
                 function addMarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
-                    if (marker2 != null) {
-                        marker2.remove()
+                    if (marker != null) {
+                        marker.remove()
                     }
                     if (marker != null) {
                         marker.remove()
                     }
-                    marker2 = L.marker(e.latlng)
-                    marker2.addTo(map);
-                    coords = marker2.getLatLng();
+                    marker = L.marker(e.latlng)
+                    marker.addTo(map);
+                    coords = marker.getLatLng();
                     //window.customAlert(coords)
                     map.off('click', addMarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet
-                    enableAddMarker2();
+                    enableAddmarker();
                 }
 
-                function enableAddMarker2() {
+                function enableAddmarker() {
                     customAlert("click-alert3");
-                    map.on('click', addMarker2);
+                    map.on('click', addmarker);
                 }
 
-                function addMarker2(e) {
+                function addmarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
                     if (marker != null) {
                         marker.remove()
@@ -884,7 +884,7 @@
                     marker3.bindPopup("Point2").openPopup();
                     coords2 = marker3.getLatLng();
                     //window.customAlert(coords)
-                    map.off('click', addMarker2);
+                    map.off('click', addmarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet;
@@ -910,29 +910,29 @@
 
                 function addMarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
-                    if (marker2 != null) {
-                        marker2.remove()
+                    if (marker != null) {
+                        marker.remove()
                     }
                     if (marker != null) {
                         marker.remove()
                     }
-                    marker2 = L.marker(e.latlng)
-                    marker2.addTo(map);
-                    coords = marker2.getLatLng();
+                    marker = L.marker(e.latlng)
+                    marker.addTo(map);
+                    coords = marker.getLatLng();
                     //window.customAlert(coords)
                     map.off('click', addMarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet
-                    enableAddMarker2();
+                    enableAddmarker();
                 }
 
-                function enableAddMarker2() {
+                function enableAddmarker() {
                     customAlert("click-alert3");
-                    map.on('click', addMarker2);
+                    map.on('click', addmarker);
                 }
 
-                function addMarker2(e) {
+                function addmarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
                     if (marker != null) {
                         marker.remove()
@@ -942,11 +942,11 @@
                     marker3.bindPopup("Point2").openPopup();
                     coords2 = marker3.getLatLng();
                     //window.customAlert(coords)
-                    map.off('click', addMarker2);
+                    map.off('click', addmarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet;
-                    publishMarker2();
+                    publishmarker();
                 }
 
                 enableAddMarker();
