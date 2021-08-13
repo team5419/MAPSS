@@ -390,7 +390,8 @@
             var rectangle;
             var newrectangle
             var rectangles = [];
-            var names = []
+            var names = [];
+            var img;
 
 
             function populate_rectangles() {
@@ -800,6 +801,8 @@
                 // Get name of item to add
                 name = itemToAdd();
                 info = shelfNumber();
+                // TODO: GET USER IMAGE LATER
+                img = '/static/roboticsStudio.png'
 
                 // Prompt user to click on screen after hiding the alert for success
                 customAlert("click-alert");
@@ -819,7 +822,7 @@
                     }
                     marker = L.marker(e.latlng)
                     marker.addTo(map);
-                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p>").openPopup();
+                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p><img src='"+img+"' style='width:200px;height:auto;'/>").openPopup();
                     coords = marker.getLatLng();
                     //window.customAlert(coords)
                     map.off('click', addMarker);
