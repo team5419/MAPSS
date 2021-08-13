@@ -23,6 +23,7 @@
         src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
     <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
     <!-- Google Icons -->
     <!-- Search here: https://fonts.google.com/icons?icon.query=search Documentation here: https://developers.google.com/fonts/docs/material_icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -119,6 +120,7 @@
                     }
                     else if (task == "add") {
                         $('#newItemModal').modal('show')
+                        startWebCam();
                     }
                     else if (task == "move") {
 
@@ -167,6 +169,12 @@
                             <label for="shelf-number" class="col-form-label">Shelf</label>
                             <input class="form-control" id="shelf-number" type="number" min="0" max="1000">
                             <!-- TODO: Make sure imputs are good -->
+                        </div>
+                        <div class="form-group">
+                            <button id="take-image-button" type="button" class="btn btn-primary">Add Image</button>
+                            <video id="webcam" autoplay playsinline width="640" height="480"></video>
+                            <canvas id="canvas" class="d-none"></canvas>
+                            <audio id="snapSound" src="audio/snap.wav" preload="auto"></audio>
                         </div>
                     </form>
                 </div>
@@ -393,6 +401,33 @@
             var names = [];
             var img;
 
+            //Initialize webcam
+            const webcamElement = document.getElementById('webcam');
+            const canvasElement = document.getElementById('canvas');
+            const snapSoundElement = document.getElementById('snapSound');
+            const webcam = new Webcam(webcamElement, 'user', canvasElement, snapSoundElement);
+
+            function startWebCam() {
+                webcam.start()
+                    .then(result => {
+                        console.log("webcam started");
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
+            function stopWebCam() {
+                webcam.stop()
+            }
+            $('#newItemModal').on('hidden.bs.modal', function () {
+                stopWebCam();
+            });
+            $("#take-image-button").click(function () {
+                let picture = webcam.snap();
+                console.log(picture);
+                document.querySelector('#download-photo').href = picture;
+
+            });
 
             function populate_rectangles() {
                 $.getJSON({
@@ -615,8 +650,7 @@
                 $.getJSON({
                     url: '/set_values',
                     data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
-                    success: function (data) 
-                    {
+                    success: function (data) {
                         var containter;
                         if (data.length > 1) {
                             addOverlapList(data);
@@ -634,8 +668,7 @@
                 customAlert("add-alert");
             }
 
-            function setOverlapContainer(containter)
-            {
+            function setOverlapContainer(containter) {
                 $.getJSON({
                     url: '/pick_container',
                     data: { container: containter },
@@ -822,7 +855,7 @@
                     }
                     marker = L.marker(e.latlng)
                     marker.addTo(map);
-                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p><img src='"+img+"' style='width:200px;height:auto;'/>").openPopup();
+                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p><img src='" + img + "' style='width:200px;height:auto;'/>").openPopup();
                     coords = marker.getLatLng();
                     //window.customAlert(coords)
                     map.off('click', addMarker);
