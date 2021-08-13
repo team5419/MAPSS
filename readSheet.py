@@ -232,11 +232,12 @@ def set_values():
     x_coordinate = json.loads(request.args.get('lat'))
     y_coordinate = json.loads(request.args.get('lng'))
     shelf_number = json.loads(request.args.get("info"))
-    set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number)
-    return "hi"
+    hi = set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number)
+    return hi
 
 
 def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
+
     overlapping_containers = []
     name_of_container = "Not on Shelf"
     service = build('sheets', 'v4', credentials=creds)

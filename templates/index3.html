@@ -621,6 +621,7 @@
                 var nameOfItem = JSON.stringify(name);
                 var latOfItem = JSON.stringify(latFinal);
                 var lngOfItem = JSON.stringify(lngFinal);
+
                 $.getJSON({
                     url: '/set_values',
                     data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
@@ -634,7 +635,6 @@
                             const sb = document.querySelector('#overlapContainerName')
                             btn.onclick = (event) => {
                                 event.preventDefault();
-                                window.alert(data[sb.value]);
                                 containter = JSON.stringify(data[sb.value]);
                             };
                             //DATA IS AN ARRAY WITH THE NAMES OF THE OVERLAPPING CONTAINERS       
