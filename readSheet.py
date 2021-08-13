@@ -93,7 +93,8 @@ def move_container():
     # Get row number (index) of item (name_of_item)
     for i in range(len(help[0])):
         if help[6][i] == container:
-                values = [[(int(x1)+int(x2))/2, (int(y1)+int(y2))/2]]
+
+                values = [[(int((x1+x2)/2)), (int((y1+y2)/2))]]
                 body = {'values': values}
 
                 service.spreadsheets().values().update(
@@ -210,7 +211,9 @@ def set_values_container():
     y_coordinate2 = json.loads(request.args.get('lng2'))
     set_values_container_2(name_of_item, colour_of_item,
                            x_coordinate1, y_coordinate1, x_coordinate2, y_coordinate2)
-    return
+
+    return 'success'
+
 
 
 def set_values_container_2(name_of_item, colour_of_item, x_coordinate1, y_coordinate1, x_coordinate2, y_coordinate2):
@@ -342,7 +345,9 @@ def remove_values():
     x_coordinate = json.loads(request.args.get('lat'))
     y_coordinate = json.loads(request.args.get('lng'))
     remove_values2(x_coordinate, y_coordinate)
-    return
+
+    return 'success'
+
 
 
 def remove_values2(x_coordinate, y_coordinate):
