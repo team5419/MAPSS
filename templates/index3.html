@@ -636,19 +636,22 @@
                             btn.onclick = (event) => {
                                 event.preventDefault();
                                 containter = JSON.stringify(data[sb.value]);
+                                setOverlapContainer(containter)
                             };
-                            //DATA IS AN ARRAY WITH THE NAMES OF THE OVERLAPPING CONTAINERS       
-                            $.getJSON({
-                                url: '/pick_container',
-                                data: { container1: containter },
-                                success: function (data2) {
-                                }
-                            });
                         }
                     }
                 });
                 customAlert("add-alert");
+            }
 
+            function setOverlapContainer(containter)
+            {
+                $.getJSON({
+                    url: '/pick_container',
+                    data: { container: containter },
+                    success: function (data2) {
+                    }
+                });
             }
 
             function publishContainer() {

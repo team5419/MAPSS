@@ -49,6 +49,7 @@ def pick_container():
     service.spreadsheets().values().update(
         spreadsheetId=SPREADSHEET_ID, range="digital_organizer!G"+str(len(values[0])),
         valueInputOption="USER_ENTERED", body=body).execute()
+    return "hi"
 
 @app.route('/move_container', methods=["GET"])
 def move_container():
