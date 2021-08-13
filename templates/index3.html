@@ -427,6 +427,7 @@
                 var data = rectangle2.getLatLngs();
                 var width = Math.abs((data[0][0]).lat - (data[0][2]).lat); 
                 var height = Math.abs((data[0][0]).lng - (data[0][2]).lng);
+                
                 rectangle2.on({
                     mousedown: function () {
                         map.dragging.disable();
@@ -443,6 +444,7 @@
                     map.dragging.enable();
                     map.removeEventListener('mousemove');
                     rectangle2.off()
+
                     var row_to_replace = JSON.stringify(rowToReplace);
                     var x1 = JSON.stringify((rectangle2.getLatLngs())[0][0].lat);
                     var x2 = JSON.stringify((rectangle2.getLatLngs())[0][2].lat);
@@ -463,6 +465,7 @@
                 addContainerData2()
             }
 
+
             function publishmarker() {
                 // Get name of item to add
                 var latFinal1 = Math.round(marker3.getLatLng().lat);
@@ -475,6 +478,7 @@
 
                 if (marker != null) {
                     marker.remove()
+
                 }
                 if (marker3 != null) {
                     marker3.remove()
@@ -908,20 +912,25 @@
 
                 function addMarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
+
                     if (marker != null) {
                         marker.remove()
+
                     }
                     if (marker != null) {
                         marker.remove()
                     }
+
                     marker = L.marker(e.latlng)
                     marker.addTo(map);
                     coords = marker.getLatLng();
+
                     //window.customAlert(coords)
                     map.off('click', addMarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet
+
                     enableAddmarker();
                 }
 
@@ -931,6 +940,7 @@
                 }
 
                 function addmarker(e) {
+
                     //Check if there is a marker there and remove it before adding the new one
                     if (marker != null) {
                         marker.remove()
@@ -940,11 +950,13 @@
                     marker3.bindPopup("Point2").openPopup();
                     coords2 = marker3.getLatLng();
                     //window.customAlert(coords)
+
                     map.off('click', addmarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet;
                     publishmarker();
+
                 }
 
                 enableAddMarker();
