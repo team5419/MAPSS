@@ -627,7 +627,7 @@
                     success: function (data) 
                     {
                         var containter;
-                        if (data.length != 0) {
+                        if (data.length > 1) {
                             addOverlapList(data);
                             $('#overlapContainerModal').modal('show')
                             const btn = document.querySelector('#OverlapContainer');
