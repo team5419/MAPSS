@@ -176,11 +176,14 @@
                                 <video id="webcam" autoplay playsinline></video>
                                 <script>
                                     function snapPicture () {
-                                        let picture = webcam.snap();
+                                        webcam.snap(img => {
+                                            console.log("saving image");
+                                            document.body.appendChild(saveImageFromURI(img));
+                                        });
                                         var videoStream = document.getElementById('webcam');
                                         videoStream.style.display = 'none';
-                                        console.log("saving image");
-                                        document.body.appendChild(saveImageFromURI(picture));
+                                        
+                                        
                                         //document.querySelector('#download-photo').href = picture;
                                     }
                                 </script>
