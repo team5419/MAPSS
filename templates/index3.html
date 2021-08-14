@@ -176,14 +176,10 @@
                                 <video id="webcam" autoplay playsinline></video>
                                 <script>
                                     function snapPicture () {
-                                        webcam.snap(img => {
-                                            console.log("saving image");
-                                            document.body.appendChild(saveImageFromURI(img));
-                                        });
+                                        let picture = webcam.snap();
+                                        saveImageFromURI(picture);
                                         var videoStream = document.getElementById('webcam');
                                         videoStream.style.display = 'none';
-                                        
-                                        
                                         //document.querySelector('#download-photo').href = picture;
                                     }
                                 </script>
@@ -192,7 +188,6 @@
                         </div>
                         <div class="form-group">
                             <canvas id="canvas" class="d-none"></canvas>
-                            <audio id="snapSound" src="audio/snap.wav" preload="auto"></audio>
                         </div>
                     </form>
                 </div>
@@ -422,8 +417,7 @@
             //Initialize webcam
             const webcamElement = document.getElementById('webcam');
             const canvasElement = document.getElementById('canvas');
-            const snapSoundElement = document.getElementById('snapSound');
-            const webcam = new Webcam(webcamElement, 'user', canvasElement, snapSoundElement);
+            const webcam = new Webcam(webcamElement, 'user', canvasElement);
 
             function startWebCam() {
                 webcam.start()
@@ -441,10 +435,7 @@
                 stopWebCam();
             });
             function saveImageFromURI(URI) {
-                src = '/images/' + URI + '.png',
-                    img = document.createElement('img');
-
-                img.src = src;
+                img = URI;
                 return img;
             }
 
@@ -662,6 +653,7 @@
 
             //Send marker to spreadsheet
             function publishMarker() {
+                console.log(img.length)
 
                 // Get name of item to add
                 var latFinal = Math.round(marker.getLatLng().lat);
@@ -864,7 +856,7 @@
                 name = itemToAdd();
                 info = shelfNumber();
                 // TODO: GET USER IMAGE LATER, IF NO IMAGE, RETURN "Null"
-                img = '/static/roboticsStudio.png'
+                //img = '/static/roboticsStudio.png'
 
                 if (img != "Null") {
                     codeForImage = "<img src='" + img + "' style='width:200px;height:auto;'/>";
