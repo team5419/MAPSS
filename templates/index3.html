@@ -172,19 +172,21 @@
                         </div>
                         <div class="form-group">
                             <label for="shelf-number" class="col-form-label">Add Image</label>
-                            <div class="embed-responsive embed-responsive-1by1">
+                            <div id="imageModalDisplay" class="embed-responsive embed-responsive-1by1">
                                 <video id="webcam" autoplay playsinline></video>
                                 <script>
-                                    function snapPicture () {
+                                    function snapPicture() {
                                         let picture = webcam.snap();
                                         saveImageFromURI(picture);
-                                        var videoStream = document.getElementById('webcam');
-                                        videoStream.style.display = 'none';
-                                        //document.querySelector('#download-photo').href = picture;
+                                        var codeForImageModal = '<img id="imageFromCamera" src="' + img + '"/>';
+                                        document.getElementById('webcam').remove();
+                                        document.getElementById('imageModalDisplay').innerHTML = null;
+                                        document.getElementById('imageModalDisplay').innerHTML = codeForImageModal;
                                     }
                                 </script>
                             </div>
-                            <button id="take-image-button" type="button" class="btn btn-primary" onclick="snapPicture()">Capture Image</button>
+                            <button id="take-image-button" type="button" class="btn btn-primary"
+                                onclick="snapPicture()">Capture Image</button>
                         </div>
                         <div class="form-group">
                             <canvas id="canvas" class="d-none"></canvas>
