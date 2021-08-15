@@ -317,15 +317,15 @@ def get_values2(name_of_item):
             values_of_item.append(values[i][index])
         
         i = 0
-        viewing = values[values_of_item.length + i][index];
-        saved = '';
+        viewing = values[len(values_of_item) + i][index]
+        saved = ''
         
         while(viewing != ';'):
-            saved += viewing;
+            saved += viewing
             i += 1
-            viewing = values[values_of_item.length + i][index]
+            viewing = values[len(values_of_item) + i][index]
 
-        values_of_item.append(viewing);
+        values_of_item.append(saved)
         
         values_to_return.append(values_of_item)
 
