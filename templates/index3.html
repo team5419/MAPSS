@@ -179,7 +179,7 @@
                                         let picture = webcam.snap();
                                         saveImageFromURI(picture);
                                         var codeForImageModal = '<img src="' + img + '"/>';
-                                        document.getElementById('webcam').style.display = 'none';
+                                        document.getElementById('webcam').remove();
                                         document.getElementById('imageModalDisplay').innerHTML += codeForImageModal;
                                         //document.querySelector('#download-photo').href = picture;
                                     }
@@ -654,7 +654,7 @@
 
             //Send marker to spreadsheet
             function publishMarker() {
-                console.log(img.length)
+                console.log(img)
 
                 // Get name of item to add
                 var latFinal = Math.round(marker.getLatLng().lat);
@@ -876,7 +876,7 @@
                 //img = '/static/roboticsStudio.png'
 
                 if (img != "Null") {
-                    codeForImage = '<img class = "embed-responsive embed-responsive-1by1" src="' + img + '" style="width:200px;height:auto;"/>';
+                    codeForImage = "<img src='" + img + "' style='width:200px;height:auto;'/>";
                 }
                 else codeForImage = "";
 
