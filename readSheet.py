@@ -1,4 +1,4 @@
-#  to do:
+# to do:
 # - make it so it can return multiple locations if an item is in multiple locations
 # - add number out variable
 
@@ -11,6 +11,8 @@ from flask import Flask, jsonify, render_template, request, redirect
 import json
 import git
 import configparser
+
+import math
 
 config = configparser.ConfigParser()
 config.read('auth.ini')
@@ -272,8 +274,14 @@ def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number, img):
             overlapping_containers.append(name_of_container)
 
     data = [[name_of_item, x_coordinate, y_coordinate,
-             0, 0, shelf_number, name_of_container, img]]
+             0, 0, shelf_number, name_of_container]]
 
+    numCells = math.ceil(len(img) / 50000)
+    for i in range(numCells):
+        data[0].append("'"+img[i * 50000: min(len(img), (i + 1) * 50000): 1])
+
+    data[0].append(';')
+        
     sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:H1",
                                     valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body={"values": data}).execute()
     return jsonify(overlapping_containers)
@@ -305,7 +313,7 @@ def get_values2(name_of_item):
     # loop through rows of spreadsheet to get information
     for index in index:
         values_of_item = []
-        for i in range(1, 8):
+        for i in range(1, 7):
             values_of_item.append(values[i][index])
         
         i = 0
@@ -316,6 +324,7 @@ def get_values2(name_of_item):
             saved += viewing
             i += 1
             viewing = values[len(values_of_item) + i][index]
+            viewing[1:len(viewing):1]
 
         values_of_item.append(saved)
         print("WWWWWWWWWWWWWWWWWWWWW")
