@@ -278,7 +278,7 @@ def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number, img):
 
     numCells = math.ceil(len(img) / 50000)
     for i in range(numCells):
-        data[0].append(img[i * 50000: min(len(img), (i + 1) * 50000): 1])
+        data[0].append("'"+img[i * 50000: min(len(img), (i + 1) * 50000): 1])
 
     data[0].append(';')
         
@@ -324,6 +324,7 @@ def get_values2(name_of_item):
             saved += viewing
             i += 1
             viewing = values[len(values_of_item) + i][index]
+            viewing[1:len(viewing):1]
 
         values_of_item.append(saved)
         print("WWWWWWWWWWWWWWWWWWWWW")
