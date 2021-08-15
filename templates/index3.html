@@ -172,15 +172,14 @@
                         </div>
                         <div class="form-group">
                             <label for="shelf-number" class="col-form-label">Add Image</label>
-                            <div id="imageModalDisplay" class="embed-responsive embed-responsive-1by1">
+                            <div class="embed-responsive embed-responsive-1by1">
                                 <video id="webcam" autoplay playsinline></video>
                                 <script>
                                     function snapPicture () {
                                         let picture = webcam.snap();
                                         saveImageFromURI(picture);
-                                        var codeForImageModal = '<img src="' + img + '"/>';
-                                        document.getElementById('webcam').style.display = 'none';
-                                        document.getElementById('imageModalDisplay').innerHTML += codeForImageModal;
+                                        var videoStream = document.getElementById('webcam');
+                                        videoStream.style.display = 'none';
                                         //document.querySelector('#download-photo').href = picture;
                                     }
                                 </script>
@@ -860,7 +859,7 @@
                 //img = '/static/roboticsStudio.png'
 
                 if (img != "Null") {
-                    codeForImage = '<img class = "embed-responsive embed-responsive-1by1" src="' + img + '" style="width:200px;height:auto;"/>';
+                    codeForImage = "<img src='" + img + "' style='width:200px;height:auto;'/>";
                 }
                 else codeForImage = "";
 
