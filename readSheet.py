@@ -317,7 +317,7 @@ def get_values2(name_of_item):
             values_of_item.append(values[i][index])
         
         i = 0
-        viewing = values[len(values_of_item) + i][index]
+        viewing = ""
         saved = ''
         
         while(viewing != ';'):
@@ -326,7 +326,8 @@ def get_values2(name_of_item):
             viewing = values[len(values_of_item) + i][index]
 
         values_of_item.append(saved)
-        
+        print("WWWWWWWWWWWWWWWWWWWWW")
+        print(saved)
         values_to_return.append(values_of_item)
 
     return values_to_return
