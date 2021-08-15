@@ -23,6 +23,7 @@
         src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
     <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
     <!-- Google Icons -->
     <!-- Search here: https://fonts.google.com/icons?icon.query=search Documentation here: https://developers.google.com/fonts/docs/material_icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -119,6 +120,7 @@
                     }
                     else if (task == "add") {
                         $('#newItemModal').modal('show')
+                        startWebCam();
                     }
                     else if (task == "move") {
 
@@ -167,6 +169,27 @@
                             <label for="shelf-number" class="col-form-label">Shelf</label>
                             <input class="form-control" id="shelf-number" type="number" min="0" max="1000">
                             <!-- TODO: Make sure imputs are good -->
+                        </div>
+                        <div class="form-group">
+                            <label for="shelf-number" class="col-form-label">Add Image</label>
+                            <div id="imageModalDisplay" class="embed-responsive embed-responsive-1by1">
+                                <video id="webcam" autoplay playsinline></video>
+                                <script>
+                                    function snapPicture() {
+                                        let picture = webcam.snap();
+                                        saveImageFromURI(picture);
+                                        var codeForImageModal = '<img id="imageFromCamera" src="' + img + '"/>';
+                                        document.getElementById('webcam').remove();
+                                        document.getElementById('imageModalDisplay').innerHTML = null;
+                                        document.getElementById('imageModalDisplay').innerHTML = codeForImageModal;
+                                    }
+                                </script>
+                            </div>
+                            <button id="take-image-button" type="button" class="btn btn-primary"
+                                onclick="snapPicture()">Capture Image</button>
+                        </div>
+                        <div class="form-group">
+                            <canvas id="canvas" class="d-none"></canvas>
                         </div>
                     </form>
                 </div>
@@ -390,8 +413,33 @@
             var rectangle;
             var newrectangle
             var rectangles = [];
-            var names = []
+            var names = [];
+            var img;
 
+            //Initialize webcam
+            const webcamElement = document.getElementById('webcam');
+            const canvasElement = document.getElementById('canvas');
+            const webcam = new Webcam(webcamElement, 'user', canvasElement);
+
+            function startWebCam() {
+                webcam.start()
+                    .then(result => {
+                        console.log("webcam started");
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
+            function stopWebCam() {
+                webcam.stop()
+            }
+            $('#newItemModal').on('hidden.bs.modal', function () {
+                stopWebCam();
+            });
+            function saveImageFromURI(URI) {
+                img = URI;
+                return img;
+            }
 
             function populate_rectangles() {
                 $.getJSON({
@@ -427,7 +475,7 @@
                 var data = rectangle2.getLatLngs();
                 var width = Math.abs((data[0][0]).lat - (data[0][2]).lat); 
                 var height = Math.abs((data[0][0]).lng - (data[0][2]).lng);
-                
+
                 rectangle2.on({
                     mousedown: function () {
                         map.dragging.disable();
@@ -465,7 +513,6 @@
                 addContainerData2()
             }
 
-
             function publishmarker() {
                 // Get name of item to add
                 var latFinal1 = Math.round(marker3.getLatLng().lat);
@@ -478,7 +525,6 @@
 
                 if (marker != null) {
                     marker.remove()
-
                 }
                 if (marker3 != null) {
                     marker3.remove()
@@ -577,8 +623,13 @@
                             }
 
                             for (let i = 0; i < data.length; i++) {
+                                var codeForImage = "";
+                                if (data[i][6] != "Null") {
+                                    codeForImage = "<img src='" + data[i][6] + "' style='width:200px;height:auto;'/>";
+                                }
+
                                 marker = L.marker([data[i][0], data[i][1]]).addTo(map);
-                                marker.bindPopup("<p class='center'><b>" + name + "<br>Shelf Number: " + data[i][4] + "<br>Container: " + data[i][5] + "</p>").openPopup();
+                                marker.bindPopup("<p class='center'><b>" + name + "<br>Shelf Number: " + data[i][4] + "<br>Container: " + data[i][5] + "</p>" + codeForImage).openPopup();
                             }
                         }
                     });
@@ -604,6 +655,7 @@
 
             //Send marker to spreadsheet
             function publishMarker() {
+                console.log(img.length)
 
                 // Get name of item to add
                 var latFinal = Math.round(marker.getLatLng().lat);
@@ -612,12 +664,12 @@
                 var nameOfItem = JSON.stringify(name);
                 var latOfItem = JSON.stringify(latFinal);
                 var lngOfItem = JSON.stringify(lngFinal);
+                var imgForItem = JSON.stringify(img);
 
                 $.getJSON({
                     url: '/set_values',
-                    data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info },
-                    success: function (data) 
-                    {
+                    data: { name: nameOfItem, lat: latOfItem, lng: lngOfItem, info: info, img: imgForItem },
+                    success: function (data) {
                         var containter;
                         if (data.length > 1) {
                             addOverlapList(data);
@@ -635,8 +687,7 @@
                 customAlert("add-alert");
             }
 
-            function setOverlapContainer(containter)
-            {
+            function setOverlapContainer(containter) {
                 $.getJSON({
                     url: '/pick_container',
                     data: { container: containter },
@@ -717,14 +768,18 @@
                     /*append the DIV element as a child of the autocomplete container:*/
                     this.parentNode.appendChild(a);
                     /*for each item in the array...*/
-                    for (i = 0; i < arr.length; i++) {
+                    let count = 0;
+                    for (i = 0; i < arr.length && count < 5; i++) {
                         /*check if the item starts with the same letters as the text field value:*/
-                        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                        const index = arr[i].toUpperCase().indexOf(val.toUpperCase());
+                        if (index != -1 /*arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()*/) {
+                            count++;
                             /*create a DIV element for each matching element:*/
                             b = document.createElement("DIV");
                             /*make the matching letters bold:*/
-                            b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
-                            b.innerHTML += arr[i].substr(val.length);
+                            b.innerHTML = arr[i].substr(0, index);
+                            b.innerHTML += "<strong>" + arr[i].substr(index, val.length) + "</strong>";
+                            b.innerHTML += arr[i].substr(index + val.length);
                             /*insert a input field that will hold the current array item's value:*/
                             b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
                             /*execute a function when someone clicks on the item value (DIV element):*/
@@ -802,6 +857,13 @@
                 // Get name of item to add
                 name = itemToAdd();
                 info = shelfNumber();
+                // TODO: GET USER IMAGE LATER, IF NO IMAGE, RETURN "Null"
+                //img = '/static/roboticsStudio.png'
+
+                if (img != "Null") {
+                    codeForImage = '<img class = "embed-responsive embed-responsive-1by1" src="' + img + '" style="width:200px;height:auto;"/>';
+                }
+                else codeForImage = "";
 
                 // Prompt user to click on screen after hiding the alert for success
                 customAlert("click-alert");
@@ -821,7 +883,7 @@
                     }
                     marker = L.marker(e.latlng)
                     marker.addTo(map);
-                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p>").openPopup();
+                    marker.bindPopup("<p class='center'><b>New Item: " + name + "<br>Coordinates: (" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + ")</p>" + codeForImage).openPopup();
                     coords = marker.getLatLng();
                     //window.customAlert(coords)
                     map.off('click', addMarker);
@@ -912,25 +974,20 @@
 
                 function addMarker(e) {
                     //Check if there is a marker there and remove it before adding the new one
-
                     if (marker != null) {
                         marker.remove()
-
                     }
                     if (marker != null) {
                         marker.remove()
                     }
-
                     marker = L.marker(e.latlng)
                     marker.addTo(map);
                     coords = marker.getLatLng();
-
                     //window.customAlert(coords)
                     map.off('click', addMarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet
-
                     enableAddmarker();
                 }
 
@@ -940,7 +997,6 @@
                 }
 
                 function addmarker(e) {
-
                     //Check if there is a marker there and remove it before adding the new one
                     if (marker != null) {
                         marker.remove()
@@ -950,13 +1006,11 @@
                     marker3.bindPopup("Point2").openPopup();
                     coords2 = marker3.getLatLng();
                     //window.customAlert(coords)
-
                     map.off('click', addmarker);
                     //Hide the alert telling them to click
                     customAlert();
                     //Send the marker to the spreadsheet;
                     publishmarker();
-
                 }
 
                 enableAddMarker();
@@ -969,6 +1023,7 @@
             /*
             var img = new Image();
             img.src = '/static/roboticsMap.png';
+
             bounds = [[0, 0], [img.height, img.width]];
             */
 

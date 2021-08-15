@@ -12,6 +12,8 @@ import json
 import git
 import configparser
 
+import math
+
 config = configparser.ConfigParser()
 config.read('auth.ini')
 SPREADSHEET_ID = config.get('auth', 'SPREADSHEET_ID')
@@ -93,7 +95,6 @@ def move_container():
     # Get row number (index) of item (name_of_item)
     for i in range(len(help[0])):
         if help[6][i] == container:
-
                 values = [[(int((x1+x2)/2)), (int((y1+y2)/2))]]
                 body = {'values': values}
 
@@ -211,9 +212,7 @@ def set_values_container():
     y_coordinate2 = json.loads(request.args.get('lng2'))
     set_values_container_2(name_of_item, colour_of_item,
                            x_coordinate1, y_coordinate1, x_coordinate2, y_coordinate2)
-
     return 'success'
-
 
 
 def set_values_container_2(name_of_item, colour_of_item, x_coordinate1, y_coordinate1, x_coordinate2, y_coordinate2):
@@ -232,15 +231,16 @@ def set_values_container_2(name_of_item, colour_of_item, x_coordinate1, y_coordi
 
 @app.route("/set_values", methods=["GET"])
 def set_values():
+    img = json.loads(request.args.get('img'))
     name_of_item = json.loads(request.args.get('name'))
     x_coordinate = json.loads(request.args.get('lat'))
     y_coordinate = json.loads(request.args.get('lng'))
     shelf_number = json.loads(request.args.get("info"))
-    hi = set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number)
+    hi = set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number, img)
     return hi
 
 
-def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
+def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number, img):
 
     overlapping_containers = []
     name_of_container = "Not on Shelf"
@@ -276,7 +276,13 @@ def set_values2(name_of_item, x_coordinate, y_coordinate, shelf_number):
     data = [[name_of_item, x_coordinate, y_coordinate,
              0, 0, shelf_number, name_of_container]]
 
-    sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:G1",
+    numCells = math.ceil(len(img) / 50000)
+    for i in range(numCells):
+        data[0].append("'"+img[i * 50000: min(len(img), (i + 1) * 50000): 1])
+
+    data[0].append(';')
+        
+    sheet.values().append(spreadsheetId=SPREADSHEET_ID, range="digital_organizer!A1:H1",
                                     valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body={"values": data}).execute()
     return jsonify(overlapping_containers)
 
@@ -309,6 +315,20 @@ def get_values2(name_of_item):
         values_of_item = []
         for i in range(1, 7):
             values_of_item.append(values[i][index])
+        
+        i = 0
+        viewing = ""
+        saved = ''
+        
+        while(viewing != ';'):
+            saved += viewing
+            i += 1
+            viewing = values[len(values_of_item) + i][index]
+            viewing[1:len(viewing):1]
+
+        values_of_item.append(saved)
+        print("WWWWWWWWWWWWWWWWWWWWW")
+        print(saved)
         values_to_return.append(values_of_item)
 
     return values_to_return
@@ -345,9 +365,7 @@ def remove_values():
     x_coordinate = json.loads(request.args.get('lat'))
     y_coordinate = json.loads(request.args.get('lng'))
     remove_values2(x_coordinate, y_coordinate)
-
     return 'success'
-
 
 
 def remove_values2(x_coordinate, y_coordinate):
