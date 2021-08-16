@@ -14,6 +14,8 @@ import configparser
 
 import math
 
+from pyasn1.type.univ import Null
+
 config = configparser.ConfigParser()
 config.read('auth.ini')
 SPREADSHEET_ID = config.get('auth', 'SPREADSHEET_ID')
@@ -315,20 +317,21 @@ def get_values2(name_of_item):
         values_of_item = []
         for i in range(1, 7):
             values_of_item.append(values[i][index])
-        
-        i = 0
-        viewing = ""
-        saved = ''
-        
-        while(viewing != ';'):
-            saved += viewing
-            i += 1
-            viewing = values[len(values_of_item) + i][index]
-            viewing[1:len(viewing):1]
+        print(values_of_item)
+        if values[7][index] != 'Null':
+            i = 0
+            viewing = ""
+            saved = ''
+            
+            while(viewing != ';'):
+                saved += viewing
+                i += 1
+                viewing = values[len(values_of_item) + i][index]
+                viewing[1:len(viewing):1]
 
-        values_of_item.append(saved)
-        print("WWWWWWWWWWWWWWWWWWWWW")
-        print(saved)
+            values_of_item.append(saved)
+        else:
+            values_of_item.append("Null")
         values_to_return.append(values_of_item)
 
     return values_to_return
