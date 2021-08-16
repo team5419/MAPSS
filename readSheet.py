@@ -317,7 +317,6 @@ def get_values2(name_of_item):
         values_of_item = []
         for i in range(1, 7):
             values_of_item.append(values[i][index])
-        print(values_of_item)
         if values[7][index] != 'Null':
             i = 0
             viewing = ""
