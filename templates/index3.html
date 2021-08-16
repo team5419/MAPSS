@@ -170,7 +170,7 @@
                             <input class="form-control" id="shelf-number" type="number" min="0" max="1000">
                             <!-- TODO: Make sure imputs are good -->
                         </div>
-                        <div class="form-group">
+                        <div id="addImage" class="form-group">
                             <label for="shelf-number" class="col-form-label">Add Image</label>
                             <div id="imageModalDisplay" class="embed-responsive embed-responsive-1by1">
                                 <video id="webcam" autoplay playsinline></video>
@@ -179,8 +179,12 @@
                                         let picture = webcam.snap();
                                         saveImageFromURI(picture);
                                         var codeForImageModal = '<img src="' + img + '"/>';
-                                        document.getElementById('webcam').remove();
-                                        document.getElementById('imageModalDisplay').innerHTML += codeForImageModal;
+                                        document.getElementById('addImage').innerHTML += codeForImageModal;
+                                        document.getElementById('take-image-button').remove();
+                                        document.getElementById('imageModalDisplay').remove();
+                                        
+                                        //document.getElementById('webcam').remove();
+                                        //document.getElementById('imageModalDisplay').innerHTML = codeForImageModal;
                                         //document.querySelector('#download-photo').href = picture;
                                     }
                                 </script>
