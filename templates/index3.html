@@ -175,18 +175,17 @@
                             <div id="imageModalDisplay" class="embed-responsive embed-responsive-1by1">
                                 <video id="webcam" autoplay playsinline></video>
                                 <script>
-                                    function snapPicture() {
+                                    function snapPicture () {
                                         let picture = webcam.snap();
                                         saveImageFromURI(picture);
-                                        var codeForImageModal = '<img id="imageFromCamera" src="' + img + '"/>';
+                                        var codeForImageModal = '<img src="' + img + '"/>';
                                         document.getElementById('webcam').remove();
-                                        document.getElementById('imageModalDisplay').innerHTML = null;
-                                        document.getElementById('imageModalDisplay').innerHTML = codeForImageModal;
+                                        document.getElementById('imageModalDisplay').innerHTML += codeForImageModal;
+                                        //document.querySelector('#download-photo').href = picture;
                                     }
                                 </script>
                             </div>
-                            <button id="take-image-button" type="button" class="btn btn-primary"
-                                onclick="snapPicture()">Capture Image</button>
+                            <button id="take-image-button" type="button" class="btn btn-primary" onclick="snapPicture()">Capture Image</button>
                         </div>
                         <div class="form-group">
                             <canvas id="canvas" class="d-none"></canvas>
@@ -655,7 +654,7 @@
 
             //Send marker to spreadsheet
             function publishMarker() {
-                console.log(img.length)
+                console.log(img)
 
                 // Get name of item to add
                 var latFinal = Math.round(marker.getLatLng().lat);
@@ -768,30 +767,46 @@
                     /*append the DIV element as a child of the autocomplete container:*/
                     this.parentNode.appendChild(a);
                     /*for each item in the array...*/
-                    let count = 0;
-                    for (i = 0; i < arr.length && count < 5; i++) {
+                    let indexes = [];
+                    for (i = 1; i < arr.length; i++) {
                         /*check if the item starts with the same letters as the text field value:*/
-                        const index = arr[i].toUpperCase().indexOf(val.toUpperCase());
-                        if (index != -1 /*arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()*/) {
-                            count++;
-                            /*create a DIV element for each matching element:*/
-                            b = document.createElement("DIV");
-                            /*make the matching letters bold:*/
-                            b.innerHTML = arr[i].substr(0, index);
-                            b.innerHTML += "<strong>" + arr[i].substr(index, val.length) + "</strong>";
-                            b.innerHTML += arr[i].substr(index + val.length);
-                            /*insert a input field that will hold the current array item's value:*/
-                            b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-                            /*execute a function when someone clicks on the item value (DIV element):*/
-                            b.addEventListener("click", function (e) {
-                                /*insert the value for the autocomplete text field:*/
-                                inp.value = this.getElementsByTagName("input")[0].value;
-                                /*close the list of autocompleted values,
-                                (or any other open lists of autocompleted values:*/
-                                closeAllLists();
-                            });
-                            a.appendChild(b);
+                        if (arr[i].toUpperCase().includes(val.toUpperCase())) {
+                            indexes.push(arr[i]);
                         }
+                    }
+
+                    let sorted = false;
+                    while(!sorted) {
+                        sorted = true;
+                        for(let i = 0; i < indexes.length - 1; i++) {
+                            if(indexes[i + 1].length < indexes[i].length) {
+                                const saved = indexes[i];
+                                indexes[i] = indexes[i + 1];
+                                indexes[i + 1] = saved;
+                                sorted = false;
+                            }
+                        }
+                    }
+                    
+                    for(let i = 0; i < Math.min(indexes.length, 5); i++) {
+                        const index = indexes[i].toUpperCase().indexOf(val.toUpperCase());
+                        /*create a DIV element for each matching element:*/
+                        b = document.createElement("DIV");
+                        /*make the matching letters bold:*/
+                        b.innerHTML = indexes[i].substr(0, index);
+                        b.innerHTML += "<strong>" + indexes[i].substr(index, val.length) + "</strong>";
+                        b.innerHTML += indexes[i].substr(index + val.length);
+                        /*insert a input field that will hold the current array item's value:*/
+                        b.innerHTML += "<input type='hidden' value='" + indexes[i] + "'>";
+                        /*execute a function when someone clicks on the item value (DIV element):*/
+                        b.addEventListener("click", function (e) {
+                            /*insert the value for the autocomplete text field:*/
+                            inp.value = this.getElementsByTagName("input")[0].value;
+                            /*close the list of autocompleted values,
+                            (or any other open lists of autocompleted values:*/
+                            closeAllLists();
+                        });
+                        a.appendChild(b);
                     }
                 });
                 /*execute a function presses a key on the keyboard:*/
@@ -861,7 +876,7 @@
                 //img = '/static/roboticsStudio.png'
 
                 if (img != "Null") {
-                    codeForImage = '<img class = "embed-responsive embed-responsive-1by1" src="' + img + '" style="width:200px;height:auto;"/>';
+                    codeForImage = "<img src='" + img + "' style='width:200px;height:auto;'/>";
                 }
                 else codeForImage = "";
 
