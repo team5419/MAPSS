@@ -16,11 +16,7 @@ Install dependancies:
 (Using a virtual environment is recomended. Also make sure you have node installed)
 
 You will need a long list of dependencies which includes yarn.
-
-```bash
-npm install yarn
-yarn install
-```
+I am too lazy to implement a "how to" guide so just contact me idk.
 
 ## Running
 
@@ -29,6 +25,13 @@ yarn start
 ```
 
 This will launch the application in your browser for you.
+
+
+## Building
+
+```bash
+yarn build
+```
 
 ## Contributing
 

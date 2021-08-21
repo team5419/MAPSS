@@ -15,15 +15,13 @@ const Toolbar = (): JSX.Element => {
 	const remove_item_on_click = (): void => {
 		/// TODO: Implement RemoveItem OnClick Event
 	}
-	
-	/// TODO: Figure Out What It Does
-	const func_1 = (): void => {
-
+		
+	const move_item_on_click = (): void => {
+		/// TODO: Implement MoveItem OnClick Event
 	}
 
-	/// TODO: Figure Out What It Does
-	const func_2 = (): void => {
-
+	const edit_item_on_click = (): void => {
+		/// TODO: Implement EditItem OnClick Event
 	}
 
 	const google_sheets_on_click = (): void => {
@@ -46,8 +44,8 @@ const Toolbar = (): JSX.Element => {
 			<ButtonGroup classes="btn-group mr-3" role="group">
 				<Button icon="add_circle_outline" onclick={add_item_on_click}/>
 				<Button icon="remove_circle_outline" onclick={remove_item_on_click}/>
-				<Button icon="open_with" onclick={func_1}/>
-				<Button icon="edit" onclick={func_2}/>
+				<Button icon="open_with" onclick={move_item_on_click}/>
+				<Button icon="edit" onclick={edit_item_on_click}/>
 			</ButtonGroup>
 			<ButtonGroup classes="btn-group mr-3" role="group">
 				<Button icon="search" data={{ toggle: "modal", target: "#locateItemModal" }}/>
