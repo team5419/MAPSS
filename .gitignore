@@ -1,5 +1,7 @@
 *.ini
 __pycache__/
 keys.json
-tes.py
-*.csv
+
+legacy
+node_modules
+.gradle

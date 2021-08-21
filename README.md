@@ -13,21 +13,22 @@ git clone https://github.com/team5419/MAPSS.git
 ```
 Install dependancies:
 
-(Using a virtual environment is recomended. Also make sure you are running python 3)
+(Using a virtual environment is recomended. Also make sure you have node installed)
 
-You will need [Flask](https://pypi.org/project/Flask/), [Google API Client](https://pypi.org/project/google-api-python-client/), [GitPython](https://pypi.org/project/GitPython/), and [configparser](https://pypi.org/project/configparser/)
+You will need a long list of dependencies which includes yarn.
 
 ```bash
-pip3 install Flask google-api-python-client GitPython configparser
+npm install yarn
+yarn install
 ```
 
 ## Running
 
 ```bash
-python3 readSheet.py
+yarn start
 ```
 
-You should then go to [`http://127.0.0.1:5000/`](http://127.0.0.1:5000/) in your web browser.
+This will launch the application in your browser for you.
 
 ## Contributing
 

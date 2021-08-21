@@ -1,0 +1,12 @@
+.btn:focus {
+	outline: none;
+	box-shadow: none;
+}
+
+input[type=radio] {
+	visibility: hidden;
+}
+
+.btn-toolbar {
+	margin: 10px;
+}
