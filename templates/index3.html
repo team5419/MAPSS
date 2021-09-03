@@ -181,12 +181,8 @@
                                         saveImageFromURI(picture);
                                         var codeForImageModal = '<img src="' + img + '"/>';
                                         document.getElementById('addImage').innerHTML += codeForImageModal;
-                                        document.getElementById('take-image-button').remove();
-                                        document.getElementById('imageModalDisplay').remove();
-                                        
-                                        //document.getElementById('webcam').remove();
-                                        //document.getElementById('imageModalDisplay').innerHTML = codeForImageModal;
-                                        //document.querySelector('#download-photo').href = picture;
+                                        $('addImage').css("display", "none");
+                                        $('imageModalDisplay').css("display", "none");
                                     }
                                 </script>
                             </div>
@@ -225,6 +221,23 @@
                             <label for="shelf-number" class="col-form-label">Shelf</label>
                             <input class="form-control" id="edit-shelf-number" type="number" min="0" max="1000">
                             <!-- TODO: Make sure imputs are good -->
+                        </div>
+                        <div id="addImage" class="form-group">
+                            <label for="shelf-number" class="col-form-label">Add Image</label>
+                            <div id="imageModalDisplay" class="embed-responsive embed-responsive-1by1">
+                                <video id="webcam" autoplay playsinline></video>
+                                <script>
+                                    function snapPicture () {
+                                        let picture = webcam.snap();
+                                        saveImageFromURI(picture);
+                                        var codeForImageModal = '<img src="' + img + '"/>';
+                                        document.getElementById('addImage').innerHTML += codeForImageModal;
+                                        $('addImage').css("display", "none");
+                                        $('imageModalDisplay').css("display", "none");
+                                    }
+                                </script>
+                            </div>
+                            <button id="take-image-button" type="button" class="btn btn-primary" onclick="snapPicture()">Capture Image</button>
                         </div>
                     </form>
                 </div>
@@ -659,7 +672,6 @@
 
             //Send marker to spreadsheet
             function publishMarker() {
-                console.log(img)
 
                 // Get name of item to add
                 var latFinal = Math.round(marker.getLatLng().lat);
@@ -686,6 +698,7 @@
                                 setOverlapContainer(containter)
                             };
                         }
+                        img = "Null"
                     }
                 });
                 customAlert("add-alert");
